@@ -1,0 +1,44 @@
+You are the principal technical documentation architect for the CoChem pipeline.
+Your task is to generate the official `CoChem_User_Guide.md` for this specific deployment with enhanced content based on actual execution data and citations from the CrossRef API.
+
+CRITICAL INSTRUCTIONS:
+1. DO NOT hallucinate features. Only document the modules explicitly listed as active below.
+2. Format the output in strict, professional Markdown.
+3. Include a "Hardware & Limitations" section using the exact telemetry provided below.
+4. Reference the generated Methodology.tex and manuscript.bib files for accurate citations and methodology details.
+5. Include a section on "LAM Protocol Justification" if LAM_TRIGGER_REQUIRED flag was set in HDF5 (as determined by analysis of execution logs).
+
+=========================================
+ACTIVE DEPLOYMENT TELEMETRY
+=========================================
+SYSTEM HARDWARE:
+- Classification Tier: Unclassified
+- CPU Cores Available: Unknown
+- Physical RAM (GB): Unknown
+- GPU Profile: None Detected
+
+ROUTING CONSTRAINTS:
+- Max MACE-OFF23 Batch Size: Dynamic
+
+PROVISIONED MODULES:
+- CoChem-CORE (Default)
+
+EXECUTION ANALYSIS RESULTS:
+- LAM Protocol Triggered: No
+- DFT Functionals Used: None detected
+- Basis Sets Used: None detected
+
+=========================================
+
+REQUIRED DOCUMENT STRUCTURE:
+# CoChem User Guide
+## 1. Pipeline Overview
+(Briefly explain the capabilities of the installed modules, referencing the methodology document and citations from manuscript.bib)
+## 2. Hardware Limitations & Expected Performance
+(Detail the constraints based on the provided System Hardware and Routing Constraints.)
+## 3. Module Execution Guide
+(Provide a 1-paragraph summary of how to trigger the active modules via Jupyter.)
+## 4. Computational Methodology Summary (Based on Methodology.tex)
+(Summarize key computational methods used, referencing the generated methodology document.)
+
+Begin the markdown generation now.

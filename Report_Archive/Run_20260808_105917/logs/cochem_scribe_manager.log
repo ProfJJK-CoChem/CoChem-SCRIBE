@@ -1,0 +1,16 @@
+2026-08-06 21:36:38,830 - WARNING - Expected artifact not found (skipped): CoChem_User_Guide.md
+2026-08-06 21:36:38,830 - WARNING - Expected artifact not found (skipped): Photochem_Mechanism.tex
+2026-08-06 21:36:38,830 - WARNING - Expected artifact not found (skipped): Photochem_Mechanism.pdf
+2026-08-06 21:36:38,830 - WARNING - Expected artifact not found (skipped): cochem_system_config.json
+2026-08-06 21:36:38,830 - WARNING - Expected artifact not found (skipped): cochem_mint_registry.json
+2026-08-06 21:36:38,830 - WARNING - Expected artifact not found (skipped): cochem_hpc_registry.json
+2026-08-06 21:36:38,830 - WARNING - Expected artifact not found (skipped): simulated_ir_spectrum.csv
+2026-08-06 21:36:38,848 - INFO - Archive successfully compressed to Report_Archive\Run_20260806_213638.zip
+2026-08-08 10:59:17,311 - INFO - Background daemon started successfully.
+2026-08-08 10:59:19,312 - WARNING - Expected artifact not found (skipped): CoChem_User_Guide.md
+2026-08-08 10:59:19,312 - WARNING - Expected artifact not found (skipped): Photochem_Mechanism.tex
+2026-08-08 10:59:19,312 - WARNING - Expected artifact not found (skipped): Photochem_Mechanism.pdf
+2026-08-08 10:59:19,312 - WARNING - Expected artifact not found (skipped): cochem_system_config.json
+2026-08-08 10:59:19,312 - WARNING - Expected artifact not found (skipped): cochem_mint_registry.json
+2026-08-08 10:59:19,312 - WARNING - Expected artifact not found (skipped): cochem_hpc_registry.json
+2026-08-08 10:59:19,313 - WARNING - Expected artifact not found (skipped): simulated_ir_spectrum.csv

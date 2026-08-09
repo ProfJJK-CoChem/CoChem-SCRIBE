@@ -1,0 +1,7 @@
+2026-08-06 21:36:38,830 - WARNING - Expected artifact not found (skipped): CoChem_User_Guide.md
+2026-08-06 21:36:38,830 - WARNING - Expected artifact not found (skipped): Photochem_Mechanism.tex
+2026-08-06 21:36:38,830 - WARNING - Expected artifact not found (skipped): Photochem_Mechanism.pdf
+2026-08-06 21:36:38,830 - WARNING - Expected artifact not found (skipped): cochem_system_config.json
+2026-08-06 21:36:38,830 - WARNING - Expected artifact not found (skipped): cochem_mint_registry.json
+2026-08-06 21:36:38,830 - WARNING - Expected artifact not found (skipped): cochem_hpc_registry.json
+2026-08-06 21:36:38,830 - WARNING - Expected artifact not found (skipped): simulated_ir_spectrum.csv

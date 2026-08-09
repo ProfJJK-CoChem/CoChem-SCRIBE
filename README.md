@@ -1,36 +1,12 @@
-# **CoChem-SCRIBE: Automated FAIR Publication & LaTeX Engine**
+# CoChem-SCRIBE
 
-## **Overview**
+**CoChem-SCRIBE** is the Asynchronous Data Provenance and Publication Daemon of the CoChem suite.
 
-**CoChem-SCRIBE** is the final mile of the pipeline. It eliminates the tedious, error-prone process of manually copying energies, rotational constants, and thermal corrections from terminal outputs into research papers.
+Running silently in the background alongside the other 4 modules, SCRIBE is responsible for:
+- **Memory-Aware Serialization:** SCRIBE monitors the massive memory footprint of `cochem_state.h5`. When large DVR tensors or partition functions are generated, SCRIBE chunks and compresses the payload to disk using Zstandard (`.tar.zst`) in 500MB batches, safely archiving the data without crashing the Jupyter kernel.
+- **Artifact Visualization:** Generates publication-ready artifacts, including HTML 3D carousels, `.cube` files of NCI domains, Sinc-DVR probability wavefunctions mapped onto classical potentials, and high-resolution `.svg` Voigt spectral convolutions.
+- **Manuscript Scaffolding:** Translates the execution logs into an APS-compliant `Methodology.tex` document, dynamically querying the CrossRef API for citations (e.g., Grimme's D4, Sinc-DVR). It utilizes Jinja2 templating to gracefully format the manuscript even if certain modules were bypassed.
+- **LAM Protocol Justification:** If LAM_TRIGGER_REQUIRED flag was activated during execution, SCRIBE automatically injects a standardized paragraph into the LaTeX file justifying the use of Sinc-DVR over the rigid-rotor harmonic oscillator approximation.
 
-SCRIBE ingests the finalized landscape.h5 database and the fit\_provenance.json registry. It aggregates the data and uses strict templating algorithms to generate compile-ready .tex documents (utilizing siunitx for physical constants, booktabs for tables, and chemfig for 2D structures).
-
-## **Scientific & Technical Trade-offs**
-
-* **Template Rigidity vs. Flexibility:** LaTeX compilation is notoriously fragile. SCRIBE heavily restricts custom user formatting during the initial generation to mathematically guarantee that the resulting .tex file compiles without fatal math-mode or escaping errors (e.g., automatically sanitizing underscores in molecule names). You trade formatting freedom for guaranteed compilation.  
-* **The RESOURCE\_GUARD Bypass:** SCRIBE contains a localized LLM summarization tool to write "Methods" boilerplate text. However, on constrained laptops, downloading a 4GB .gguf weights file is prohibitive. SCRIBE implements a strict RESOURCE\_GUARD; if the system lacks a dedicated GPU, it completely bypasses the LLM inference and defaults to rigid, programmatic string-replacement for the methods section.
-
-## **Installation & Setup**
-
-SCRIBE assumes your operating system has a LaTeX compiler installed (e.g., texlive-full on Linux).
-
-git clone \[https://github.com/CoChem/CoChem-SCRIBE.git\](https://github.com/CoChem/CoChem-SCRIBE.git)  
-cd CoChem-SCRIBE
-
-## **How to Run**
-
-SCRIBE should only be run after all calculations (TOPOS, TORQ, etc.) are marked STAGE\_COMPLETE in the registry.
-
-1. **Initialize the Master Orchestrator:**  
-   python cochem\_scribe\_master.py  
-2. **Execution Flow:**  
-   * \[1/5\] Sweeps the landscape.h5 for converged anchors.  
-   * \[2/5\] Formats the thermodynamic and spectroscopic tables.  
-   * \[3/5\] (Optional) Triggers the local LLM for boilerplate text generation.  
-   * \[4/5\] Injects data into the siunitx LaTeX template.  
-   * \[5/5\] Dispatches a silent pdflatex subprocess call to verify compilation.
-
-## **Output**
-
-Check the Publication\_Outputs/ directory for Manuscript\_Draft.tex, Supporting\_Information.tex, and the compiled .pdf documents.
+## Usage
+Please refer to the authoritative [CoChem Master User Manual](../CoChem-BASE/CoChem_Master_User_Manual.md) for full execution instructions across the entire 5-module pipeline.
