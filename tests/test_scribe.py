@@ -127,12 +127,12 @@ def test_cochem_scribe_compiler():
 def test_cochem_scribe_master():
     from cochem_scribe_master import MethodologyTracker
     tracker = MethodologyTracker()
-    tracker.compute_flags = {"ORCA_6", "MACE_OFF24m", "DLPNO-CCSD(T)"}
+    tracker.compute_flags = {"MPQC_4", "MACE_OFF24m", "CCSD(T)-F12"}
     m_tex = tracker.render_methods_tex("test_methods.tex")
     r_bib = tracker.render_references_bib("test_references.bib")
     assert "\\section{Computational Methods}" in m_tex
     assert "@article" in r_bib
-    assert "ORCA" in m_tex or "DLPNO" in m_tex
+    assert "MPQC" in m_tex or "CCSD" in m_tex
     if Path("test_methods.tex").exists():
         Path("test_methods.tex").unlink()
     if Path("test_references.bib").exists():
@@ -146,7 +146,7 @@ def test_state_tensor_provenance_hash():
         h5_path = Path(tmpdir) / "test_state.h5"
         with h5py.File(h5_path, 'w') as f:
             f.create_dataset("tensor_1", data=np.array([1.0, 2.0, 3.0]))
-            f.attrs["calc_mode"] = "DLPNO-CCSD(T)"
+            f.attrs["calc_mode"] = "CCSD(T)-F12"
         digest1 = compute_state_tensor_provenance_hash(h5_path)
         assert len(digest1) == 64
 
@@ -169,4 +169,114 @@ def test_siunitx_table_formatting():
         tex = compiler.generate_energetics_table(str(out_tex))
         assert "\\usepackage{siunitx}" in tex
         assert "S[table-format=" in tex
+
+def test_validate_standing_rule_7():
+    from scribe_payload_builder import validate_standing_rule_7
+    violating_payload = {
+        'accuracy_claims': [
+            {'description': 'GPU ban gate', 'provenance': '[E]', 'used_as_routing_gate': True}
+        ]
+    }
+    violations = validate_standing_rule_7(violating_payload)
+    assert len(violations) == 1
+    assert "RULE 7 VIOLATION" in violations[0]
+    assert "GPU ban gate" in violations[0]
+
+    valid_payload = {
+        'accuracy_claims': [
+            {'description': 'Measured benchmark', 'provenance': '[M]', 'used_as_routing_gate': True},
+            {'description': 'Derived metric', 'provenance': '[D]', 'used_as_routing_gate': False}
+        ]
+    }
+    assert len(validate_standing_rule_7(valid_payload)) == 0
+
+def test_method_paragraphs_provenance_tags():
+    from cochem_scribe_master import METHOD_PARAGRAPHS
+    for key, text in METHOD_PARAGRAPHS.items():
+        assert any(tag in text for tag in ["[M]", "[D]", "[E]"]), f"Missing provenance tag in METHOD_PARAGRAPHS[{key}]"
+
+def test_state_tensor_provenance_hash_audit():
+    import h5py
+    import numpy as np
+    from cochem_scribe_master import compute_state_tensor_provenance_hash
+    with tempfile.TemporaryDirectory() as tmpdir:
+        h5_path = Path(tmpdir) / "audit_test.h5"
+        with h5py.File(h5_path, 'w') as f:
+            ds = f.create_dataset("state_tensor", data=np.ones((5, 5)))
+            ds.attrs["provenance_tag"] = "[M]"
+            f.attrs["tier_tag"] = "T1-1h [D]"
+        
+        digest1 = compute_state_tensor_provenance_hash(h5_path)
+        assert len(digest1) == 64
+        with h5py.File(h5_path, 'r') as f:
+            assert "provenance_tag_audit" in f.attrs
+            audit = json.loads(f.attrs["provenance_tag_audit"])
+            assert audit["[M]"] >= 1
+            assert audit["[D]"] >= 1
+
+def test_payload_builder_v4_schema():
+    builder = scribe_payload_builder.ScribePayloadBuilder()
+    payload = builder.get_payload()
+    assert "product_class" in payload
+    assert "tier_category" in payload
+    assert "tier_tag" in payload
+    assert "max_mace_batch_size" in payload
+    assert "standing_rule_7_violations" in payload
+    
+    prompt = builder.construct_user_guide_prompt()
+    assert "Max MACE-OFF24m Batch Size" in prompt
+    assert "Product Class" in prompt
+    assert "Standing Rule 7 Audit" in prompt
+
+def test_scribe_orchestration_v4_tiers():
+    orch = scribe_orchestration.ScribeOrchestrator()
+    assert hasattr(orch, 'tier_categories')
+    assert "T1" in orch.tier_categories
+    assert "T4" in orch.tier_categories
+
+def test_validate_standing_rule_7_dict_and_nested_claims():
+    from scribe_payload_builder import validate_standing_rule_7
+    nested_dict_payload = {
+        "modules": {
+            "mage": {
+                "accuracy_claims": {
+                    "claim_1": {
+                        "description": "Dict structured estimated gate",
+                        "provenance": "[e]",
+                        "used_as_routing_gate": True
+                    }
+                }
+            }
+        }
+    }
+    violations = validate_standing_rule_7(nested_dict_payload)
+    assert len(violations) == 1
+    assert "Dict structured estimated gate" in violations[0]
+
+def test_group_attribute_provenance_hash_and_exact_counting():
+    import h5py
+    import numpy as np
+    from cochem_scribe_master import compute_state_tensor_provenance_hash
+    with tempfile.TemporaryDirectory() as tmpdir:
+        h5_path = Path(tmpdir) / "group_test.h5"
+        with h5py.File(h5_path, 'w') as f:
+            grp = f.create_group("conformer_001")
+            grp.attrs["energy"] = -100.5
+            grp.attrs["provenance_tag"] = "[M]"
+            ds = f.create_dataset("tensor_1", data=np.array([1.0]))
+            ds.attrs["tag"] = "[D]"
+
+        hash_before = compute_state_tensor_provenance_hash(h5_path)
+        with h5py.File(h5_path, 'r') as f:
+            audit = json.loads(f.attrs["provenance_tag_audit"])
+            assert audit["[M]"] == 1
+            assert audit["[D]"] == 1
+
+        with h5py.File(h5_path, 'a') as f:
+            f["conformer_001"].attrs["energy"] = -200.0
+
+        hash_after = compute_state_tensor_provenance_hash(h5_path)
+        assert hash_before != hash_after
+
+
 

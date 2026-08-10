@@ -12,6 +12,7 @@ import json
 import logging
 import re
 import requests
+import hashlib
 from pathlib import Path
 from datetime import datetime
 import h5py
@@ -27,6 +28,102 @@ class Colors:
 artifact_dir = Path(os.environ.get("COCHEM_ARTIFACT_DIR", "."))
 artifact_dir.mkdir(parents=True, exist_ok=True)
 logging.basicConfig(filename=str(artifact_dir / 'cochem_scribe_payload.log'), level=logging.INFO)
+
+def _is_derived_or_estimated_tag(tag_val) -> bool:
+    if tag_val is None:
+        return True  # default to estimated if unstated
+    if isinstance(tag_val, (list, tuple, set)):
+        return any(_is_derived_or_estimated_tag(item) for item in tag_val)
+    if isinstance(tag_val, str):
+        cleaned = tag_val.strip().strip("[]").strip().lower()
+        return cleaned in ("d", "e", "derived", "estimated")
+    return False
+
+def validate_standing_rule_7(payload: dict) -> list[str]:
+    """
+    Audits report payload for Standing Rule 7 violations (§12.5 Rule 7):
+    'No [D] or [E] value may be the sole support for a hardware exclusion, a routing gate, or an accuracy claim.'
+    Returns a list of violation warnings.
+    """
+    violations = []
+    if not isinstance(payload, dict):
+        return violations
+
+    visited_ids = set()
+
+    def inspect_claim(claim: dict, context_gating: bool = False, context_accuracy: bool = False):
+        if not isinstance(claim, dict):
+            return
+        claim_id = id(claim)
+        if claim_id in visited_ids:
+            return
+        visited_ids.add(claim_id)
+
+        prov = claim.get("provenance", claim.get("provenance_tag", claim.get("tag", claim.get("provenance_tags", "[E]"))))
+        if prov is None:
+            prov = "[E]"
+
+        is_gating = (
+            context_gating or
+            bool(claim.get("used_as_routing_gate", False)) or
+            bool(claim.get("is_routing_gate", False)) or
+            bool(claim.get("is_gating", False)) or
+            bool(claim.get("routing_gate", False))
+        )
+        is_accuracy = (
+            bool(claim.get("is_accuracy_claim", False)) or
+            bool(claim.get("used_as_accuracy_claim", False)) or
+            bool(claim.get("accuracy_claim", False))
+        )
+
+        if (is_gating or is_accuracy) and _is_derived_or_estimated_tag(prov):
+            desc = claim.get("description", claim.get("name", claim.get("claim", "unnamed claim")))
+            violations.append(
+                f"RULE 7 VIOLATION: Claim '{desc}' carries tag {prov} "
+                f"but is used to gate hardware or routing decisions without local [M] validation."
+            )
+
+    def traverse(obj, context_gating: bool = False, context_accuracy: bool = False):
+        if isinstance(obj, dict):
+            has_claim_keys = any(k in obj for k in ("provenance", "provenance_tag", "used_as_routing_gate", "is_routing_gate", "is_gating", "is_accuracy_claim", "used_as_accuracy_claim"))
+            if has_claim_keys:
+                inspect_claim(obj, context_gating=context_gating, context_accuracy=context_accuracy)
+
+            for key, val in obj.items():
+                is_gate_container = key in ("routing_gates", "gating_claims") or "routing_gate" in key
+                is_acc_container = key in ("accuracy_claims",) or "accuracy_claim" in key
+                is_generic_container = key in ("claims",)
+
+                cg = context_gating or is_gate_container
+                ca = context_accuracy or is_acc_container
+
+                if is_gate_container or is_acc_container or is_generic_container:
+                    if isinstance(val, dict):
+                        for sub_k, sub_v in val.items():
+                            if isinstance(sub_v, dict):
+                                inspect_claim(sub_v, context_gating=cg, context_accuracy=ca)
+                                traverse(sub_v, context_gating=cg, context_accuracy=ca)
+                            else:
+                                traverse(sub_v, context_gating=cg, context_accuracy=ca)
+                    elif isinstance(val, list):
+                        for item in val:
+                            if isinstance(item, dict):
+                                inspect_claim(item, context_gating=cg, context_accuracy=ca)
+                                traverse(item, context_gating=cg, context_accuracy=ca)
+                            else:
+                                traverse(item, context_gating=cg, context_accuracy=ca)
+                    else:
+                        traverse(val, context_gating=cg, context_accuracy=ca)
+                else:
+                    traverse(val, context_gating=context_gating, context_accuracy=context_accuracy)
+
+        elif isinstance(obj, list):
+            for item in obj:
+                traverse(item, context_gating=context_gating, context_accuracy=context_accuracy)
+
+    traverse(payload)
+    return violations
+
 
 class ScribePayloadBuilder:
     def __init__(self):
@@ -46,7 +143,7 @@ class ScribePayloadBuilder:
             logging.warning(f"Configuration file {filepath.name} missing. Returning empty state.")
             return {}
         try:
-            with open(filepath, "r") as f:
+            with open(filepath, "r", encoding="utf-8") as f:
                 return json.load(f)
         except json.JSONDecodeError:
             logging.error(f"Corrupted JSON detected in {filepath.name}.")
@@ -54,11 +151,11 @@ class ScribePayloadBuilder:
 
     def _parse_execution_logs(self) -> dict:
         """
-        Parses raw ORCA .out and MACE .log execution streams.
+        Parses raw MPQC .out and MACE .log execution streams.
         Resolves SCRIBE-03: Multi-line regex parser matching keyword blocks and % block specs.
         Resolves SCRIBE-12: Extracts exact software version metadata.
         """
-        print(f"{Colors.OKCYAN}[🔍] Parsing execution logs for adaptive fallbacks and versioning...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Parsing execution logs for adaptive fallbacks and versioning...{Colors.ENDC}")
         log_data = {
             'fallbacks': [],
             'dft_functionals': [],
@@ -83,51 +180,52 @@ class ScribePayloadBuilder:
         except Exception as e:
             logging.error(f"Error parsing HDF5 for LAM trigger: {e}")
 
-        # Multi-line regex parser for ORCA files
-        orca_files = list(Path(".").glob("*.out")) + list(Path(".").rglob("*.out"))
-        for orca_file in orca_files:
+        # Multi-line regex parser for MPQC files
+        mpqc_files = list(Path(".").glob("*.out")) + list(Path(".").rglob("*.out"))
+        for mpqc_file in mpqc_files:
             try:
-                with open(orca_file, 'r', errors='ignore') as f:
+                with open(mpqc_file, 'r', encoding='utf-8', errors='ignore') as f:
                     content = f.read()
+                    
+                    # Confirm MPQC
+                    if 'MPQC' not in content and 'Massively Parallel Quantum Chemistry' not in content:
+                        continue
 
-                    # Extract software version (e.g. ORCA 6.0.0)
-                    ver_match = re.search(r'Program Version\s+([0-9\.]+)', content, re.IGNORECASE)
+                    # Extract software version
+                    ver_match = re.search(r'(?:MPQC|Program) Version\s+([0-9\.]+)', content, re.IGNORECASE)
                     if ver_match:
-                        log_data['software_versions'].append(f"ORCA {ver_match.group(1)}")
+                        log_data['software_versions'].append(f"MPQC {ver_match.group(1)}")
+                    else:
+                        log_data['software_versions'].append("MPQC 4")
 
-                    # Multi-line ! header match
-                    header_matches = re.findall(r'!\s*([^\n\r]+)', content)
-                    for line in header_matches:
-                        tokens = line.split()
-                        for tok in tokens:
-                            if any(func in tok.upper() for func in ['B3LYP', 'PBE0', 'wB97X-D', 'r2SCAN', 'DLPNO']):
-                                log_data['dft_functionals'].append(tok)
-                            elif any(b in tok.lower() for b in ['def2-', 'cc-p', 'aug-cc-']):
-                                log_data['basis_sets'].append(tok)
-
-                    # Multi-line % block match
-                    percent_blocks = re.findall(r'%[a-zA-Z0-9_]+\s+[^%]+end', content, re.DOTALL)
-                    if percent_blocks:
-                        log_data['fallbacks'].append(f"Found block specs in {orca_file.name}")
-
-                    if 'FALLBACK' in content or 'AIMNet2' in content:
-                        log_data['fallbacks'].append(f"Found adaptive fallback in {orca_file.name}")
+                    # Basic parsing for methods/basis
+                    tok_lower = content.lower()
+                    if 'ccsd(t)-f12' in tok_lower or 'ccsdt-f12' in tok_lower:
+                        if 'CCSD(T)-F12' not in log_data['dft_functionals']:
+                            log_data['dft_functionals'].append('CCSD(T)-F12')
+                    
+                    if 'cc-pvtz-f12' in tok_lower:
+                        if 'cc-pVTZ-F12' not in log_data['basis_sets']:
+                            log_data['basis_sets'].append('cc-pVTZ-F12')
+                            
+                    if 'fallback' in tok_lower or 'aimnet2' in tok_lower:
+                        log_data['fallbacks'].append(f"Found adaptive fallback in {mpqc_file.name}")
 
             except Exception as e:
-                logging.error(f"Error parsing ORCA file {orca_file}: {e}")
+                logging.error(f"Error parsing MPQC file {mpqc_file}: {e}")
 
         # Default versions if not explicitly matched
         if not log_data['software_versions']:
-            log_data['software_versions'] = ["ORCA 6.0.0", "MACE 0.3.4"]
+            log_data['software_versions'] = ["MPQC 4.0.0", "MACE 0.3.4"]
 
         # Parse MACE log files
         mace_files = list(Path(".").glob("*.log")) + list(Path(".").rglob("*.log"))
         for mace_file in mace_files:
             try:
-                with open(mace_file, 'r', errors='ignore') as f:
+                with open(mace_file, 'r', encoding='utf-8', errors='ignore') as f:
                     content = f.read()
                     if 'MACE' in content and 'AIMNet2' in content:
-                        log_data['mlff_tiers'].append('MACE → AIMNet2')
+                        log_data['mlff_tiers'].append('MACE -> AIMNet2')
                     elif 'MACE' in content:
                         log_data['mlff_tiers'].append('MACE')
             except Exception as e:
@@ -140,7 +238,7 @@ class ScribePayloadBuilder:
         Resolves SCRIBE-11: Extracts relative free energies (delta G, delta H) from landscape HDF5
         into LaTeX tabular markup (manuscript_tables.tex).
         """
-        print(f"{Colors.OKCYAN}[📊] Extracting relative energetics into manuscript_tables.tex...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Extracting relative energetics into manuscript_tables.tex...{Colors.ENDC}")
         energetics = []
         
         h5_candidates = [self.h5_file_path, Path("landscape.h5")]
@@ -209,7 +307,7 @@ class ScribePayloadBuilder:
         Resolves SCRIBE-02: Loads external Jinja2 template from templates/ directory.
         Resolves SCRIBE-15: Automatically syncs and overwrites root Methodology.tex.
         """
-        print(f"{Colors.OKCYAN}[📄] Generating APS-compliant Methodology.tex via Jinja2...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Generating APS-compliant Methodology.tex via Jinja2...{Colors.ENDC}")
         from cochem_scribe_master import compute_state_tensor_provenance_hash
         
         provenance_payload = json.dumps(log_data, sort_keys=True).encode('utf-8')
@@ -228,7 +326,7 @@ class ScribePayloadBuilder:
         log_data['ram_gb'] = phase2.get("ram_gb", 64)
         log_data['cpu_cores'] = phase2.get("cpu_cores", 16)
         log_data['gpu_profile'] = phase2.get("gpu_profile", "NVIDIA RTX 4090 (24GB)")
-        log_data['software_versions'] = ", ".join(log_data.get('software_versions', ["ORCA 6.0.0"]))
+        log_data['software_versions'] = ", ".join(log_data.get('software_versions', ["MPQC 4.0.0"]))
 
         template_file = self.template_dir / "methodology.tex.j2"
         if template_file.exists():
@@ -248,7 +346,7 @@ class ScribePayloadBuilder:
 \\title{Computational Methodology}
 \\begin{document}
 \\section{Provenance Hash}
-\\texttt{{{ provenance_hash }}}
+\\texttt{ {{ provenance_hash }} }
 \\end{document}"""
             methodology = Template(latex_template).render(**log_data)
 
@@ -263,7 +361,7 @@ class ScribePayloadBuilder:
         Queries CrossRef API for DOI citations with local SQLite/JSON caching.
         Resolves SCRIBE-01: Implements local crossref_cache.json to avoid network failures in air-gapped HPC.
         """
-        print(f"{Colors.OKCYAN}[🔍] Querying CrossRef API for citations (with cache)...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Querying CrossRef API for citations (with cache)...{Colors.ENDC}")
         cache = {}
         if self.cache_path.exists():
             try:
@@ -348,7 +446,7 @@ class ScribePayloadBuilder:
         Generates complete manuscript.bib file from CrossRef results.
         Resolves SCRIBE-16: Dynamic parsing of journal name, volume, issue, pages, and publication year into BibTeX.
         """
-        print(f"{Colors.OKCYAN}📜 Generating manuscript.bib file...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Generating manuscript.bib file...{Colors.ENDC}")
         bib_content = ""
         for term, citation in citations.items():
             if 'error' not in citation:
@@ -372,12 +470,56 @@ class ScribePayloadBuilder:
 }}\n\n"""
         return bib_content
 
-    def construct_user_guide_prompt(self) -> str:
-        """Compiles the authoritative LLM Prompt for the User Guide."""
-        print(f"{Colors.OKCYAN}[📄] Constructing enhanced user guide prompt with dynamic data...{Colors.ENDC}")
+    def get_payload(self) -> dict:
+        """
+        Builds structured SCRIBE payload containing telemetry, Product Class, T1-T4 tier tags,
+        max MACE-OFF24m batch size, accuracy claims, and Standing Rule 7 audit results.
+        """
         system_config = self._load_json_safe(self.config_path)
         manifest = self._load_json_safe(self.manifest_path)
         log_data = self._parse_execution_logs()
+
+        phase2 = system_config.get("phase_2_data", {})
+        routing = system_config.get("adaptive_routing", {})
+
+        product_class = system_config.get("product_class", routing.get("product_class", "PRODUCT_A"))
+        tier_tag = system_config.get("tier_tag", routing.get("tier_tag", "T1-1h"))
+        tier_category = system_config.get("tier_category", routing.get("tier_category", "T1"))
+        mace_batch = routing.get("mace_batch_size", routing.get("max_mace_batch_size", 512))
+
+        accuracy_claims = system_config.get("accuracy_claims", [])
+        routing_gates = system_config.get("routing_gates", [])
+
+        payload = {
+            "product_class": product_class,
+            "tier_tag": tier_tag,
+            "tier_category": tier_category,
+            "max_mace_batch_size": mace_batch,
+            "accuracy_claims": accuracy_claims,
+            "routing_gates": routing_gates,
+            "hardware": {
+                "ram_gb": phase2.get("ram_gb", 64),
+                "cpu_cores": phase2.get("cpu_cores", 16),
+                "gpu_profile": phase2.get("gpu_profile", "NVIDIA RTX 4090 (24GB)")
+            },
+            "execution_logs": log_data
+        }
+
+        violations = validate_standing_rule_7(payload)
+        payload["standing_rule_7_violations"] = violations
+        if violations:
+            for v in violations:
+                logging.warning(v)
+
+        return payload
+
+    def construct_user_guide_prompt(self) -> str:
+        """Compiles the authoritative LLM Prompt for the User Guide."""
+        print(f"{Colors.OKCYAN}[INFO] Constructing enhanced user guide prompt with dynamic data...{Colors.ENDC}")
+        payload_data = self.get_payload()
+        system_config = self._load_json_safe(self.config_path)
+        manifest = self._load_json_safe(self.manifest_path)
+        log_data = payload_data["execution_logs"]
         
         # Resolves SCRIBE-19: Explicit logging when metrics missing
         phase2 = system_config.get("phase_2_data", {})
@@ -390,7 +532,11 @@ class ScribePayloadBuilder:
         
         routing = system_config.get("adaptive_routing", {})
         classification = routing.get("classification", "Unclassified")
-        mace_batch = routing.get("mace_batch_size", "Dynamic")
+        mace_batch = payload_data["max_mace_batch_size"]
+        product_class = payload_data["product_class"]
+        tier_category = payload_data["tier_category"]
+        tier_tag = payload_data["tier_tag"]
+        violations = payload_data["standing_rule_7_violations"]
         
         active_modules = manifest.get("active_modules", ["CoChem-CORE (Default)"])
         module_list_str = "\n".join([f"- {mod}" for mod in active_modules])
@@ -427,13 +573,16 @@ SYSTEM HARDWARE:
 - GPU Profile: {gpu_profile}
 
 ROUTING CONSTRAINTS:
-- Max MACE-OFF23 Batch Size: {mace_batch}
+- Product Class: {product_class} (Class A: De Novo Absolute / Class B: Template-Anchored / Class C: Differences)
+- Tier Category: {tier_category} ({tier_tag})
+- Max MACE-OFF24m Batch Size: {mace_batch}
 
 PROVISIONED MODULES:
 {module_list_str}
 
 EXECUTION ANALYSIS RESULTS:
 - LAM Protocol Triggered: {'Yes' if log_data['lam_trigger'] else 'No'}
+- Standing Rule 7 Audit: {'PASSED (No violations)' if not violations else f'{len(violations)} VIOLATIONS DETECTED'}
 - DFT Functionals Used: {', '.join(set(log_data['dft_functionals'])) if log_data['dft_functionals'] else 'None detected'}
 - Basis Sets Used: {', '.join(set(log_data['basis_sets'])) if log_data['basis_sets'] else 'None detected'}
 

@@ -23,7 +23,7 @@
 \section{Quantum Chemical Methods}
 The quantum chemical calculations were performed using the following DFT functionals, basis sets, and software versions:
 {% if dft_functionals %}
-\texttt{{{ dft_functionals | unique | join(', ') }}} with \texttt{{{ basis_sets | unique | join(', ') }}} basis sets ({% if software_versions %}\texttt{{{ software_versions }}}{% else %}ORCA 6.0.0{% endif %}).
+\texttt{{{ dft_functionals | unique | join(', ') }}} with \texttt{{{ basis_sets | unique | join(', ') }}} basis sets ({% if software_versions %}\texttt{{{ software_versions }}}{% else %}MPQC 4.0.0{% endif %}).
 {% else %}
 None detected.
 {% endif %}
