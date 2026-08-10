@@ -1,0 +1,294 @@
+2026-08-08 11:03:50,254 - ERROR - Payload generation failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_payload_builder.py", line 339, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_payload_builder.py", line 327, in main
+    print(f"{Colors.OKCYAN}\u25b6 Harvesting system registries for LLM context...{Colors.ENDC}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u25b6' in position 5: character maps to <undefined>
+
+2026-08-08 11:03:50,442 - ERROR - User Guide generation failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 188, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 185, in main
+    engine.generate_document()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 162, in generate_document
+    markdown_content = self.query_api(prompt)
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 139, in query_api
+    print(f"\U0001f4e1 Transmitting payload to {self.model_name}...")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f4e1' in position 0: character maps to <undefined>
+
+2026-08-08 11:03:50,631 - ERROR - Results & Discussion generation failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 188, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 185, in main
+    engine.generate_document()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 162, in generate_document
+    markdown_content = self.query_api(prompt)
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 139, in query_api
+    print(f"\U0001f4e1 Transmitting payload to {self.model_name}...")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f4e1' in position 0: character maps to <undefined>
+
+2026-08-08 11:03:50,913 - ERROR - Figure generation failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_figure_generator.py", line 405, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_figure_generator.py", line 402, in main
+    generator.generate_all_artifacts()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_figure_generator.py", line 387, in generate_all_artifacts
+    print(f"{Colors.OKCYAN}\U0001f3a8 Generating all publication-ready artifacts...{Colors.ENDC}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f3a8' in position 5: character maps to <undefined>
+
+2026-08-08 11:03:50,984 - ERROR - Legacy verification bundling failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_legacy_bundler.py", line 75, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_legacy_bundler.py", line 71, in main
+    bundler.find_legacy_files()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_legacy_bundler.py", line 32, in find_legacy_files
+    print(f"{Colors.OKCYAN}\U0001f50d Searching for legacy spectroscopy files...{Colors.ENDC}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f50d' in position 5: character maps to <undefined>
+
+2026-08-08 11:03:51,172 - ERROR - Final archive creation failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_doc_manager.py", line 239, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_doc_manager.py", line 213, in main
+    manager.start_background_daemon()  # Start monitoring daemon
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_doc_manager.py", line 60, in start_background_daemon
+    print(f"{Colors.OKCYAN}\U0001f504 Starting CoChem-SCRIBE background daemon...{Colors.ENDC}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f504' in position 5: character maps to <undefined>
+
+2026-08-08 11:05:50,535 - ERROR - Payload generation failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_payload_builder.py", line 339, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_payload_builder.py", line 328, in main
+    final_prompt = builder.construct_user_guide_prompt()
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_payload_builder.py", line 236, in construct_user_guide_prompt
+    print(f"{Colors.OKCYAN}\U0001f4c4 Constructing enhanced user guide prompt with dynamic data...{Colors.ENDC}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f4c4' in position 5: character maps to <undefined>
+
+2026-08-08 11:06:22,126 - ERROR - User Guide generation failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 188, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 185, in main
+    engine.generate_document()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 162, in generate_document
+    markdown_content = self.query_api(prompt)
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 156, in query_api
+    print(f"{Colors.FAIL}\u274c API Error: Failed to generate content after 5 attempts. Falling back to offline mode.{Colors.ENDC}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u274c' in position 5: character maps to <undefined>
+
+2026-08-08 11:06:53,702 - ERROR - Results & Discussion generation failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 188, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 185, in main
+    engine.generate_document()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 162, in generate_document
+    markdown_content = self.query_api(prompt)
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 156, in query_api
+    print(f"{Colors.FAIL}\u274c API Error: Failed to generate content after 5 attempts. Falling back to offline mode.{Colors.ENDC}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u274c' in position 5: character maps to <undefined>
+
+2026-08-08 11:06:53,995 - ERROR - Figure generation failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_figure_generator.py", line 405, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_figure_generator.py", line 402, in main
+    generator.generate_all_artifacts()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_figure_generator.py", line 387, in generate_all_artifacts
+    print(f"{Colors.OKCYAN}\U0001f3a8 Generating all publication-ready artifacts...{Colors.ENDC}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f3a8' in position 5: character maps to <undefined>
+
+2026-08-08 11:06:54,069 - ERROR - Legacy verification bundling failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_legacy_bundler.py", line 75, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_legacy_bundler.py", line 71, in main
+    bundler.find_legacy_files()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_legacy_bundler.py", line 32, in find_legacy_files
+    print(f"{Colors.OKCYAN}\U0001f50d Searching for legacy spectroscopy files...{Colors.ENDC}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f50d' in position 5: character maps to <undefined>
+
+2026-08-08 11:06:54,265 - ERROR - Final archive creation failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_doc_manager.py", line 239, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_doc_manager.py", line 213, in main
+    manager.start_background_daemon()  # Start monitoring daemon
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_doc_manager.py", line 60, in start_background_daemon
+    print(f"{Colors.OKCYAN}\U0001f504 Starting CoChem-SCRIBE background daemon...{Colors.ENDC}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f504' in position 5: character maps to <undefined>
+
+2026-08-08 11:07:37,567 - ERROR - Payload generation failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_payload_builder.py", line 339, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_payload_builder.py", line 328, in main
+    final_prompt = builder.construct_user_guide_prompt()
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_payload_builder.py", line 236, in construct_user_guide_prompt
+    print(f"{Colors.OKCYAN}[\U0001f4c4] Constructing enhanced user guide prompt with dynamic data...{Colors.ENDC}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f4c4' in position 6: character maps to <undefined>
+
+2026-08-08 11:08:09,139 - ERROR - User Guide generation failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 188, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 185, in main
+    engine.generate_document()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 162, in generate_document
+    markdown_content = self.query_api(prompt)
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 156, in query_api
+    print(f"{Colors.FAIL}[\u274c] API Error: Failed to generate content after 5 attempts. Falling back to offline mode.{Colors.ENDC}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u274c' in position 6: character maps to <undefined>
+
+2026-08-08 11:08:40,697 - ERROR - Results & Discussion generation failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 188, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 185, in main
+    engine.generate_document()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 162, in generate_document
+    markdown_content = self.query_api(prompt)
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_inference.py", line 156, in query_api
+    print(f"{Colors.FAIL}[\u274c] API Error: Failed to generate content after 5 attempts. Falling back to offline mode.{Colors.ENDC}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u274c' in position 6: character maps to <undefined>
+
+2026-08-08 11:08:41,000 - ERROR - Figure generation failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_figure_generator.py", line 405, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_figure_generator.py", line 402, in main
+    generator.generate_all_artifacts()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_figure_generator.py", line 387, in generate_all_artifacts
+    print(f"{Colors.OKCYAN}[\U0001f3a8] Generating all publication-ready artifacts...{Colors.ENDC}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f3a8' in position 6: character maps to <undefined>
+
+2026-08-08 11:08:41,071 - ERROR - Legacy verification bundling failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_legacy_bundler.py", line 75, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_legacy_bundler.py", line 71, in main
+    bundler.find_legacy_files()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_legacy_bundler.py", line 32, in find_legacy_files
+    print(f"{Colors.OKCYAN}[\U0001f50d] Searching for legacy spectroscopy files...{Colors.ENDC}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f50d' in position 6: character maps to <undefined>
+
+2026-08-08 11:08:41,265 - ERROR - Final archive creation failed: Traceback (most recent call last):
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_doc_manager.py", line 239, in <module>
+    main()
+    ~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_doc_manager.py", line 213, in main
+    manager.start_background_daemon()  # Start monitoring daemon
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "D:\GitHub-Repo\CoChem-SCRIBE\scribe_doc_manager.py", line 60, in start_background_daemon
+    print(f"{Colors.OKCYAN}[\U0001f504] Starting CoChem-SCRIBE background daemon...{Colors.ENDC}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f504' in position 6: character maps to <undefined>
+
+2026-08-10 15:20:44,674 - INFO - Daemon process spawned with PID: 27292
+2026-08-10 15:20:47,948 - INFO - Payload generation completed successfully
+2026-08-10 15:20:48,167 - INFO - User Guide generation completed successfully
+2026-08-10 15:20:48,435 - INFO - LaTeX methodology rendering completed successfully
+2026-08-10 15:20:48,656 - INFO - Results & Discussion generation completed successfully
+2026-08-10 15:20:49,307 - INFO - Figure generation completed successfully
+2026-08-10 15:20:49,476 - INFO - Legacy verification bundling completed successfully
+2026-08-10 15:20:49,624 - INFO - FAIR publication archive completed successfully
+2026-08-10 15:20:51,828 - INFO - Final archive creation completed successfully
+2026-08-10 15:23:08,246 - INFO - Daemon process spawned with PID: 10028
+2026-08-10 15:23:10,600 - INFO - Payload generation completed successfully
+2026-08-10 15:23:10,838 - INFO - User Guide generation completed successfully
+2026-08-10 15:23:11,102 - INFO - LaTeX methodology rendering completed successfully
+2026-08-10 15:23:11,322 - INFO - Results & Discussion generation completed successfully
+2026-08-10 15:23:11,752 - INFO - Figure generation completed successfully
+2026-08-10 15:23:11,970 - INFO - Legacy verification bundling completed successfully
+2026-08-10 15:23:12,140 - INFO - FAIR publication archive completed successfully

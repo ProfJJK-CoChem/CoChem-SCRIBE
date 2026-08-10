@@ -275,3 +275,75 @@ UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f50d' in posit
            ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f504' in position 6: character maps to <undefined>
 
+2026-08-10 15:20:44,674 - INFO - Daemon process spawned with PID: 27292
+2026-08-10 15:20:47,948 - INFO - Payload generation completed successfully
+2026-08-10 15:20:48,167 - INFO - User Guide generation completed successfully
+2026-08-10 15:20:48,435 - INFO - LaTeX methodology rendering completed successfully
+2026-08-10 15:20:48,656 - INFO - Results & Discussion generation completed successfully
+2026-08-10 15:20:49,307 - INFO - Figure generation completed successfully
+2026-08-10 15:20:49,476 - INFO - Legacy verification bundling completed successfully
+2026-08-10 15:20:49,624 - INFO - FAIR publication archive completed successfully
+2026-08-10 15:20:51,828 - INFO - Final archive creation completed successfully
+2026-08-10 15:23:08,246 - INFO - Daemon process spawned with PID: 10028
+2026-08-10 15:23:10,600 - INFO - Payload generation completed successfully
+2026-08-10 15:23:10,838 - INFO - User Guide generation completed successfully
+2026-08-10 15:23:11,102 - INFO - LaTeX methodology rendering completed successfully
+2026-08-10 15:23:11,322 - INFO - Results & Discussion generation completed successfully
+2026-08-10 15:23:11,752 - INFO - Figure generation completed successfully
+2026-08-10 15:23:11,970 - INFO - Legacy verification bundling completed successfully
+2026-08-10 15:23:12,140 - INFO - FAIR publication archive completed successfully
+2026-08-10 15:23:14,417 - INFO - Final archive creation completed successfully
+2026-08-10 15:28:39,076 - INFO - Daemon process spawned with PID: 4624
+2026-08-10 15:28:41,404 - INFO - Payload generation completed successfully
+2026-08-10 15:28:41,601 - INFO - User Guide generation completed successfully
+2026-08-10 15:28:41,837 - INFO - LaTeX methodology rendering completed successfully
+2026-08-10 15:28:42,038 - INFO - Results & Discussion generation completed successfully
+2026-08-10 15:28:42,393 - INFO - Figure generation completed successfully
+2026-08-10 15:28:42,553 - INFO - Legacy verification bundling completed successfully
+2026-08-10 15:28:42,668 - INFO - FAIR publication archive completed successfully
+2026-08-10 15:28:44,855 - INFO - Final archive creation completed successfully
+2026-08-10 15:31:05,824 - INFO - Daemon process spawned with PID: 25992
+2026-08-10 15:31:08,146 - INFO - Payload generation completed successfully
+2026-08-10 15:31:08,411 - INFO - User Guide generation completed successfully
+2026-08-10 15:31:08,672 - INFO - Daemon process spawned with PID: 33292
+2026-08-10 15:31:08,728 - INFO - LaTeX methodology rendering completed successfully
+2026-08-10 15:31:08,952 - INFO - Results & Discussion generation completed successfully
+2026-08-10 15:31:09,413 - INFO - Figure generation completed successfully
+2026-08-10 15:31:09,594 - INFO - Legacy verification bundling completed successfully
+2026-08-10 15:31:09,609 - INFO - Daemon process spawned with PID: 28152
+2026-08-10 15:31:09,734 - INFO - FAIR publication archive completed successfully
+2026-08-10 15:31:11,025 - INFO - Payload generation completed successfully
+2026-08-10 15:31:11,239 - INFO - User Guide generation completed successfully
+2026-08-10 15:31:11,516 - INFO - LaTeX methodology rendering completed successfully
+2026-08-10 15:31:11,723 - INFO - Results & Discussion generation completed successfully
+2026-08-10 15:31:11,949 - INFO - Final archive creation completed successfully
+2026-08-10 15:31:11,961 - INFO - Payload generation completed successfully
+2026-08-10 15:31:12,114 - INFO - Figure generation completed successfully
+2026-08-10 15:31:12,182 - INFO - User Guide generation completed successfully
+2026-08-10 15:31:12,275 - INFO - Legacy verification bundling completed successfully
+2026-08-10 15:31:12,427 - INFO - FAIR publication archive completed successfully
+2026-08-10 15:31:12,496 - INFO - LaTeX methodology rendering completed successfully
+2026-08-10 15:31:12,766 - INFO - Results & Discussion generation completed successfully
+2026-08-10 15:31:13,167 - INFO - Figure generation completed successfully
+2026-08-10 15:31:13,338 - INFO - Legacy verification bundling completed successfully
+2026-08-10 15:31:13,485 - INFO - FAIR publication archive completed successfully
+2026-08-10 15:31:14,650 - INFO - Final archive creation completed successfully
+2026-08-10 15:31:15,750 - INFO - Final archive creation completed successfully
+2026-08-10 15:31:20,450 - INFO - Daemon process spawned with PID: 10188
+2026-08-10 15:31:22,851 - INFO - Payload generation completed successfully
+2026-08-10 15:31:23,118 - INFO - User Guide generation completed successfully
+2026-08-10 15:31:23,373 - INFO - LaTeX methodology rendering completed successfully
+2026-08-10 15:31:23,563 - INFO - Results & Discussion generation completed successfully
+2026-08-10 15:31:23,922 - INFO - Figure generation completed successfully
+2026-08-10 15:31:24,065 - INFO - Legacy verification bundling completed successfully
+2026-08-10 15:31:24,138 - INFO - Daemon process spawned with PID: 33684
+2026-08-10 15:31:24,202 - INFO - FAIR publication archive completed successfully
+2026-08-10 15:31:26,403 - INFO - Final archive creation completed successfully
+2026-08-10 15:31:26,488 - INFO - Payload generation completed successfully
+2026-08-10 15:31:26,694 - INFO - User Guide generation completed successfully
+2026-08-10 15:31:26,953 - INFO - LaTeX methodology rendering completed successfully
+2026-08-10 15:31:27,151 - INFO - Results & Discussion generation completed successfully
+2026-08-10 15:31:27,546 - INFO - Figure generation completed successfully
+2026-08-10 15:31:27,717 - INFO - Legacy verification bundling completed successfully
+2026-08-10 15:31:27,858 - INFO - FAIR publication archive completed successfully
+2026-08-10 15:31:30,060 - INFO - Final archive creation completed successfully

@@ -57,7 +57,7 @@ class LegacyVerificationBundler:
         
     def find_legacy_files(self):
         """Finds all Pickett .lin, .cat, and .fit files in the working directory."""
-        print(f"{Colors.OKCYAN}[🔍] Searching for legacy spectroscopy files...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Searching for legacy spectroscopy files...{Colors.ENDC}")
         work_dir = Path(".")
         found_files = []
         
@@ -72,7 +72,7 @@ class LegacyVerificationBundler:
                     found_files.append(file_path)
                     self.legacy_files.append(file_path)
                     
-        print(f"{Colors.OKGREEN}✅ Found {len(self.legacy_files)} legacy files.{Colors.ENDC}")
+        print(f"{Colors.OKGREEN}[OK] Found {len(self.legacy_files)} legacy files.{Colors.ENDC}")
         logging.info(f"Found {len(self.legacy_files)} legacy files.")
 
     def compress_zstd_legacy_file(self, file_path: Path) -> Path:
@@ -92,16 +92,16 @@ class LegacyVerificationBundler:
         Resolves SCRIBE-10: Computes SHA-256 checksums and includes checksums.sha256 manifest.
         Resolves SCRIBE-20: Produces Zstandard compressed .zst archives.
         """
-        print(f"{Colors.OKCYAN}📦 Creating Legacy Verification bundle...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Creating Legacy Verification bundle...{Colors.ENDC}")
         
         if not self.legacy_files:
             A, B, C = calculate_rotational_constants()
             lin_file = Path("output.lin")
             cat_file = Path("output.cat")
             fit_file = Path("output.fit")
-            lin_file.write_text(f" 1 0 1  0 0 0 {A/2:.4f}   0.0500 1.0000\n")
-            cat_file.write_text(f"A={A:.4f} B={B:.4f} C={C:.4f}\n")
-            fit_file.write_text(f"Fit Parameters for Rotational Spectrum\nA_mhz={A:.4f}\nB_mhz={B:.4f}\nC_mhz={C:.4f}\n")
+            lin_file.write_text(f" 1 0 1  0 0 0 {A/2:.4f}   0.0500 1.0000\n", encoding='utf-8')
+            cat_file.write_text(f"A={A:.4f} B={B:.4f} C={C:.4f}\n", encoding='utf-8')
+            fit_file.write_text(f"Fit Parameters for Rotational Spectrum\nA_mhz={A:.4f}\nB_mhz={B:.4f}\nC_mhz={C:.4f}\n", encoding='utf-8')
             self.legacy_files = [lin_file, cat_file, fit_file]
             
         try:
@@ -123,7 +123,7 @@ class LegacyVerificationBundler:
                     checksum_lines.append(f"{sha_zst}  {zst_p.name}")
 
             checksum_file = Path("checksums.sha256")
-            checksum_file.write_text("\n".join(checksum_lines) + "\n")
+            checksum_file.write_text("\n".join(checksum_lines) + "\n", encoding='utf-8')
 
             with zipfile.ZipFile(self.output_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 for file_path in self.legacy_files:
@@ -132,11 +132,11 @@ class LegacyVerificationBundler:
                     zipf.write(zst_p, arcname=zst_p.name)
                 zipf.write(checksum_file, arcname=checksum_file.name)
                     
-            print(f"{Colors.OKGREEN}✅ Legacy Verification bundle created: {self.output_zip.name}{Colors.ENDC}")
+            print(f"{Colors.OKGREEN}[OK] Legacy Verification bundle created: {self.output_zip.name}{Colors.ENDC}")
             logging.info("Legacy verification bundle created successfully with checksums and Zstd compression.")
             
         except Exception as e:
-            print(f"{Colors.FAIL}[❌] Failed to create legacy bundle: {e}{Colors.ENDC}")
+            print(f"{Colors.FAIL}[FAIL] Failed to create legacy bundle: {e}{Colors.ENDC}")
             logging.error(f"Failed to create legacy bundle: {e}")
 
 def main():

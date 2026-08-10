@@ -55,7 +55,7 @@ class ScribeDocumentManager:
 
     def start_background_daemon(self):
         """Starts the asynchronous monitoring daemon."""
-        print(f"{Colors.OKCYAN}[🔄] Starting CoChem-SCRIBE background daemon...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Starting CoChem-SCRIBE background daemon...{Colors.ENDC}")
         self.is_monitoring = True
         self.monitoring_thread = threading.Thread(target=self._monitor_hdf5_memory, daemon=True)
         self.monitoring_thread.start()
@@ -66,7 +66,7 @@ class ScribeDocumentManager:
         Monitors HDF5 tensor memory usage.
         Resolves SCRIBE-13: Reduced polling thread overhead with event loop sleep checks.
         """
-        print(f"{Colors.OKCYAN}[🔍] Monitoring HDF5 tensor memory usage (event-driven)...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Monitoring HDF5 tensor memory usage (event-driven)...{Colors.ENDC}")
         last_mtime = 0
         while self.is_monitoring:
             try:
@@ -76,7 +76,7 @@ class ScribeDocumentManager:
                         last_mtime = st.st_mtime
                         current_size = st.st_size / (1024 * 1024)
                         if current_size >= self.memory_threshold_mb:
-                            print(f"{Colors.WARNING}⚠️  Memory threshold exceeded ({current_size:.2f} MB){Colors.ENDC}")
+                            print(f"{Colors.WARNING}[WARN] Memory threshold exceeded ({current_size:.2f} MB){Colors.ENDC}")
                             self._flush_hdf5_chunks()
                 time.sleep(2)
             except Exception as e:
@@ -101,7 +101,7 @@ class ScribeDocumentManager:
                 f.visititems(collect_datasets)
                 
                 for dataset_name, dataset in datasets:
-                    print(f"📦 Compressing dataset: {dataset_name}...")
+                    print(f"[INFO] Compressing dataset: {dataset_name}...")
                     chunk_file_path = chunk_dir / f"{Path(dataset_name).name}.tar.zst"
                     self._compress_dataset_chunked(dataset, chunk_file_path)
                     
@@ -142,7 +142,7 @@ class ScribeDocumentManager:
         Moves targeted generated documents and registries into the archive.
         Resolves SCRIBE-17: Recursive log file harvesting Path(".").rglob("*.log").
         """
-        print(f"🗂️  Harvesting artifacts into {self.archive_dir}...")
+        print(f"[INFO] Harvesting artifacts into {self.archive_dir}...")
         harvested_count = 0
         
         for file_name in self.target_artifacts:
@@ -172,7 +172,7 @@ class ScribeDocumentManager:
         Generates the final Zstandard-compressed payload with all artifacts.
         Resolves SCRIBE-05: Streams archive creation directly without full in-memory tar buffer.
         """
-        print(f"📦 Generating final Zstandard-compressed payload...")
+        print(f"[INFO] Generating final Zstandard-compressed payload...")
         try:
             final_archive = self.archive_dir.with_suffix('.tar.zst')
             
@@ -193,11 +193,11 @@ class ScribeDocumentManager:
                     if temp_tar.exists():
                         temp_tar.unlink()
                     
-            print(f"{Colors.OKGREEN}✅ Final payload successfully created: {final_archive.name}{Colors.ENDC}")
+            print(f"{Colors.OKGREEN}[OK] Final payload successfully created: {final_archive.name}{Colors.ENDC}")
             logging.info(f"Final payload successfully compressed to {final_archive.name}")
             
         except Exception as e:
-            print(f"{Colors.FAIL}[❌] Failed to generate final payload: {e}{Colors.ENDC}")
+            print(f"{Colors.FAIL}[FAIL] Failed to generate final payload: {e}{Colors.ENDC}")
             logging.error(f"Final payload generation error: {e}")
 
 def main():

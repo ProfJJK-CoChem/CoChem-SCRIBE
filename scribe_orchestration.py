@@ -35,21 +35,27 @@ class ScribeOrchestrator:
     def __init__(self):
         # Resolves SCRIBE-18: Process tracking for clean child process management
         self.active_processes = []
+        self.tier_categories = {
+            "T1": "Screening & Payload Build",
+            "T2": "Refinement & Methodology Generation",
+            "T3": "High-Fidelity Results & Figures",
+            "T4": "Archival & FAIR Verification"
+        }
 
     def run_command(self, cmd_str: str, description: str) -> bool:
         """
         Run a command cleanly without shell injection.
         Resolves SCRIBE-07: Uses shell=False with argument list.
         """
-        print(f"{Colors.OKCYAN}▶ {description}...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[RUN] {description}...{Colors.ENDC}")
         try:
             cmd_args = [sys.executable] + shlex.split(cmd_str.replace("python ", ""))
-            proc = subprocess.run(cmd_args, shell=False, check=True, capture_output=True, text=True)
-            print(f"{Colors.OKGREEN}✅ {description} completed successfully.{Colors.ENDC}")
+            proc = subprocess.run(cmd_args, shell=False, check=True, capture_output=True, text=True, encoding='utf-8', errors='replace')
+            print(f"{Colors.OKGREEN}[OK] {description} completed successfully.{Colors.ENDC}")
             logging.info(f"{description} completed successfully")
             return True
         except subprocess.CalledProcessError as e:
-            print(f"{Colors.FAIL}[❌] {description} failed: {e.stderr}{Colors.ENDC}")
+            print(f"{Colors.FAIL}[FAIL] {description} failed: {e.stderr}{Colors.ENDC}")
             logging.error(f"{description} failed: {e.stderr}")
             return False
 
@@ -57,7 +63,7 @@ class ScribeOrchestrator:
         """
         Resolves SCRIBE-18: Tracks background daemon PID via Popen for clean shutdown.
         """
-        print(f"{Colors.OKCYAN}▶ Spawning Document Manager daemon process...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Spawning Document Manager daemon process...{Colors.ENDC}")
         proc = subprocess.Popen([sys.executable, "scribe_doc_manager.py"], shell=False)
         self.active_processes.append(proc)
         logging.info(f"Daemon process spawned with PID: {proc.pid}")
@@ -75,35 +81,49 @@ class ScribeOrchestrator:
                 logging.info(f"Process PID {proc.pid} shut down successfully.")
 
 def main():
-    print(f"\n{Colors.BOLD}--- CoChem-SCRIBE: Master Orchestration ---{Colors.ENDC}")
-    print(f"{Colors.OKCYAN}[🔄] Initiating complete SCRIBE workflow execution...{Colors.ENDC}")
+    print(f"\n{Colors.BOLD}--- CoChem-SCRIBE: Master Orchestration (v4 T1-T4 Execution Pipeline) ---{Colors.ENDC}")
+    print(f"{Colors.OKCYAN}[INFO] Initiating complete SCRIBE workflow execution...{Colors.ENDC}")
     
     orchestrator = ScribeOrchestrator()
     
     try:
-        print(f"\n{Colors.BOLD}Stage 1: Starting Asynchronous Daemon{Colors.ENDC}")
+        # Category T1: Screening & Payload Build
+        print(f"\n{Colors.BOLD}Category T1: Screening & Payload Build{Colors.ENDC}")
+        print(f"{Colors.BOLD}  Stage 1 [T1]: Starting Asynchronous Daemon{Colors.ENDC}")
         orchestrator.spawn_daemon()
         time.sleep(2)
         
-        print(f"\n{Colors.BOLD}Stage 2: Generating LLM Payload{Colors.ENDC}")
+        print(f"{Colors.BOLD}  Stage 2 [T1]: Generating LLM Payload & Harvesting Telemetry{Colors.ENDC}")
         orchestrator.run_command("python scribe_payload_builder.py", "Payload generation")
         
-        print(f"\n{Colors.BOLD}Stage 3: Generating User Guide via LLM{Colors.ENDC}")
+        # Category T2: Refinement & Methodology Generation
+        print(f"\n{Colors.BOLD}Category T2: Refinement & Methodology Generation{Colors.ENDC}")
+        print(f"{Colors.BOLD}  Stage 3 [T2]: Generating User Guide via LLM{Colors.ENDC}")
         orchestrator.run_command("python scribe_inference.py", "User Guide generation")
         
-        print(f"\n{Colors.BOLD}Stage 4: Generating Results & Discussion{Colors.ENDC}")
+        print(f"{Colors.BOLD}  Stage 4 [T2]: Rendering LaTeX Methodology & References{Colors.ENDC}")
+        orchestrator.run_command("python cochem_scribe_master.py", "LaTeX methodology rendering")
+
+        # Category T3: High-Fidelity Results & Figures
+        print(f"\n{Colors.BOLD}Category T3: High-Fidelity Results & Figures{Colors.ENDC}")
+        print(f"{Colors.BOLD}  Stage 5 [T3]: Generating Results & Discussion{Colors.ENDC}")
         orchestrator.run_command("python scribe_inference.py generate_results_discussion", "Results & Discussion generation")
         
-        print(f"\n{Colors.BOLD}Stage 5: Generating Publication Figures{Colors.ENDC}")
+        print(f"{Colors.BOLD}  Stage 6 [T3]: Generating Publication Figures & Energetics Tables{Colors.ENDC}")
         orchestrator.run_command("python scribe_figure_generator.py", "Figure generation")
         
-        print(f"\n{Colors.BOLD}Stage 6: Creating Legacy Verification Bundle{Colors.ENDC}")
+        # Category T4: Archival & FAIR Verification
+        print(f"\n{Colors.BOLD}Category T4: Archival & FAIR Verification{Colors.ENDC}")
+        print(f"{Colors.BOLD}  Stage 7 [T4]: Creating Legacy Verification Bundle{Colors.ENDC}")
         orchestrator.run_command("python scribe_legacy_bundler.py", "Legacy verification bundling")
         
-        print(f"\n{Colors.BOLD}Stage 7: Finalizing Master Archive{Colors.ENDC}")
+        print(f"{Colors.BOLD}  Stage 8 [T4]: Building FAIR Submission Archive{Colors.ENDC}")
+        orchestrator.run_command("python cochem_scribe_archive.py", "FAIR publication archive")
+        
+        print(f"{Colors.BOLD}  Stage 9 [T4]: Finalizing Master Compressed Archive{Colors.ENDC}")
         orchestrator.run_command("python scribe_doc_manager.py", "Final archive creation")
         
-        print(f"\n{Colors.OKGREEN}{Colors.BOLD}✅ All SCRIBE workflow stages completed successfully!{Colors.ENDC}")
+        print(f"\n{Colors.OKGREEN}{Colors.BOLD}[OK] All SCRIBE v4 T1-T4 workflow stages completed successfully!{Colors.ENDC}")
         print(f"{Colors.OKCYAN}Your CoChem pipeline execution is now fully documented and archived.{Colors.ENDC}")
         
     finally:

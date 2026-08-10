@@ -8,5 +8,25 @@
     "volume": "46",
     "issue": "1",
     "pages": "1-10"
+  },
+  "Colbert-Miller Sinc-DVR": {
+    "title": "4. The Sinc-Galerkin Method",
+    "DOI": "10.1137/1.9781611971637.ch4",
+    "author": "Author et al.",
+    "year": "1992",
+    "journal": "Sinc Methods for Quadrature and Differential Equations",
+    "volume": "46",
+    "issue": "1",
+    "pages": "101-162"
+  },
+  "DefGrid4": {
+    "title": "High\u2010density\n            <i>b</i>\n            acterial\n            <i>a</i>\n            rtificial\n            <i>c</i>\n            hromosome grid (high\u2010density BAC grid)",
+    "DOI": "10.1002/9783527678679.dg05520",
+    "author": "Author et al.",
+    "year": "2025",
+    "journal": "The Dictionary of Genomics, Transcriptomics and Proteomics",
+    "volume": "46",
+    "issue": "1",
+    "pages": "1-1"
   }
 }

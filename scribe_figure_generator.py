@@ -47,7 +47,7 @@ class ScribeFigureGenerator:
 
     def _generate_topos_artifacts(self):
         """Generates TOPOS artifacts: 3D carousels, NCI domains, etc."""
-        print(f"{Colors.OKCYAN}[🎨] Generating TOPOS visualization artifacts...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Generating TOPOS visualization artifacts...{Colors.ENDC}")
         
         try:
             if not self.h5_file_path.exists():
@@ -112,7 +112,7 @@ class ScribeFigureGenerator:
 
     def _generate_torq_artifacts(self):
         """Generates TORQ artifacts: Sinc-DVR wavefunctions, IR spectra, etc."""
-        print(f"{Colors.OKCYAN}📊 Generating TORQ visualization artifacts...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Generating TORQ visualization artifacts...{Colors.ENDC}")
         try:
             if not self.h5_file_path.exists():
                 logging.warning("cochem_state.h5 not found for TORQ artifacts")
@@ -177,7 +177,7 @@ class ScribeFigureGenerator:
             logging.error(f"Error generating IR comparison plot: {e}")
 
     def _generate_spYcFit_artifacts(self):
-        print(f"{Colors.OKCYAN}📈 Generating SpycFit visualization artifacts...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Generating SpycFit visualization artifacts...{Colors.ENDC}")
         try:
             if not self.h5_file_path.exists():
                 logging.warning("cochem_state.h5 not found for SpycFit artifacts")
@@ -229,7 +229,7 @@ class ScribeFigureGenerator:
             logging.error(f"Error generating Voigt spectrum: {e}")
 
     def _generate_mass_spectrometry_artifacts(self):
-        print(f"{Colors.OKCYAN}🔬 Generating mass spectrometry visualization artifacts...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Generating mass spectrometry visualization artifacts...{Colors.ENDC}")
         try:
             qcxms_files = list(Path(".").glob("*.res"))
             if len(qcxms_files) > 0:
@@ -252,12 +252,12 @@ class ScribeFigureGenerator:
             logging.error(f"Error parsing QCxMS file {res_file}: {e}")
 
     def generate_all_artifacts(self):
-        print(f"{Colors.OKCYAN}[🎨] Generating all publication-ready artifacts...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Generating all publication-ready artifacts...{Colors.ENDC}")
         self._generate_topos_artifacts()
         self._generate_torq_artifacts()
         self._generate_spYcFit_artifacts()
         self._generate_mass_spectrometry_artifacts()
-        print(f"{Colors.OKGREEN}✅ Generated {self.figures_generated} visualization artifacts.{Colors.ENDC}")
+        print(f"{Colors.OKGREEN}[OK] Generated {self.figures_generated} visualization artifacts.{Colors.ENDC}")
         logging.info(f"Total figures generated: {self.figures_generated}")
 
 def main():

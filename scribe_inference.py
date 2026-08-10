@@ -43,7 +43,7 @@ class ScribeInferenceEngine:
 
     def load_prompt(self) -> str:
         if not self.input_payload.exists():
-            print(f"{Colors.WARNING}⚠️ Prompt payload '{self.input_payload.name}' missing. Generating default payload...{Colors.ENDC}")
+            print(f"{Colors.WARNING}[WARN] Prompt payload '{self.input_payload.name}' missing. Generating default payload...{Colors.ENDC}")
             return "Generate CoChem User Guide documentation."
         with open(self.input_payload, "r", encoding="utf-8") as f:
             return f.read()
@@ -71,7 +71,7 @@ class ScribeInferenceEngine:
 
     def _generate_results_discussion_prompt(self) -> str:
         """Generates a prompt specifically for Results and Discussion section."""
-        print(f"{Colors.OKCYAN}[📄] Generating Results & Discussion prompt with Bayesian parameters...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Generating Results & Discussion prompt with Bayesian parameters...{Colors.ENDC}")
         params = self._extract_spotify_parameters()
         
         param_summary = "No specific parameters extracted from HDF5.\n"
@@ -107,7 +107,7 @@ Begin writing the "Results & Discussion" section now.
         Resolves SCRIBE-09: Offline fallback engine rendering static Jinja2 manuscript templates
         when external LLM endpoints are unreachable or unconfigured.
         """
-        print(f"{Colors.WARNING}⚠️ Utilizing offline Jinja2 fallback template renderer for document generation.{Colors.ENDC}")
+        print(f"{Colors.WARNING}[WARN] Utilizing offline Jinja2 fallback template renderer for document generation.{Colors.ENDC}")
         logging.info("Offline Jinja2 fallback engine activated.")
 
         params = self._extract_spotify_parameters()
@@ -150,7 +150,7 @@ Detailed methodology equations and BibTeX citations have been compiled into `Met
     def query_api(self, prompt: str) -> str:
         """Executes the POST request with robust exponential backoff and offline Jinja2 fallback."""
         if not self.api_key:
-            print(f"{Colors.WARNING}⚠️ GEMINI_API_KEY not configured. Triggering offline Jinja2 fallback.{Colors.ENDC}")
+            print(f"{Colors.WARNING}[WARN] GEMINI_API_KEY not configured. Triggering offline Jinja2 fallback.{Colors.ENDC}")
             return self._fallback_offline_jinja_rendering(prompt)
 
         payload = {
@@ -174,7 +174,7 @@ Detailed methodology equations and BibTeX citations have been compiled into `Met
                 logging.error(f"API Request Failed (Attempt {attempt+1}/{len(delays)}): {e}")
                 time.sleep(delay)
 
-        print(f"{Colors.FAIL}[❌] API Error: Failed to generate content. Triggering Jinja2 offline engine.{Colors.ENDC}")
+        print(f"{Colors.FAIL}[FAIL] API Error: Failed to generate content. Triggering Jinja2 offline engine.{Colors.ENDC}")
         return self._fallback_offline_jinja_rendering(prompt)
 
     def generate_document(self):
@@ -184,19 +184,19 @@ Detailed methodology equations and BibTeX citations have been compiled into `Met
         with open(self.output_md, "w", encoding="utf-8") as f:
             f.write(markdown_content)
 
-        print(f"{Colors.OKGREEN}✅ CoChem User Guide successfully generated: {self.output_md.name}{Colors.ENDC}")
+        print(f"{Colors.OKGREEN}[OK] CoChem User Guide successfully generated: {self.output_md.name}{Colors.ENDC}")
         logging.info("SCRIBE inference execution successfully finished.")
 
     def generate_results_discussion(self):
         """Generates the Results and Discussion section specifically."""
-        print(f"{Colors.OKCYAN}[📄] Generating Results & Discussion section...{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}[INFO] Generating Results & Discussion section...{Colors.ENDC}")
         prompt = self._generate_results_discussion_prompt()
         markdown_content = self.query_api(prompt)
 
         with open(self.results_discussion_file, "w", encoding="utf-8") as f:
             f.write(markdown_content)
 
-        print(f"{Colors.OKGREEN}✅ Results & Discussion section generated: {self.results_discussion_file.name}{Colors.ENDC}")
+        print(f"{Colors.OKGREEN}[OK] Results & Discussion section generated: {self.results_discussion_file.name}{Colors.ENDC}")
         logging.info("SCRIBE results and discussion generation successfully finished.")
 
 def main():
