@@ -13,11 +13,12 @@ single reproducible submission bundle.
 import hashlib
 import json
 import logging
+logger = logging.getLogger(__name__)
 import os
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 artifact_dir = Path(os.environ.get("COCHEM_ARTIFACT_DIR", "."))
 artifact_dir.mkdir(parents=True, exist_ok=True)
@@ -117,7 +118,7 @@ class FAIRArchiveBuilder:
         ``ARCHIVE_CATEGORIES`` glob pattern.  Returns a dict mapping
         category name → list of discovered file paths.
         """
-        print(
+        logger.info(
             f"{Colors.OKCYAN}[INFO] Discovering FAIR archive artifacts...{Colors.ENDC}"
         )
         results: dict[str, list[Path]] = {cat: [] for cat in ARCHIVE_CATEGORIES}
@@ -141,11 +142,11 @@ class FAIRArchiveBuilder:
             count = len(files)
             desc = ARCHIVE_CATEGORIES[category]["description"]
             if count > 0:
-                print(
+                    logger.info(
                     f"{Colors.OKGREEN}  [OK] {desc}: {count} file(s){Colors.ENDC}"
                 )
             else:
-                print(
+                    logger.info(
                     f"{Colors.WARNING}  [WARN] {desc}: none found{Colors.ENDC}"
                 )
             logging.info(f"FAIR discover: {category} -> {count} file(s)")
@@ -160,7 +161,7 @@ class FAIRArchiveBuilder:
         Computes SHA-256 for every collected file.
         Returns dict mapping relative archive path → hex digest.
         """
-        print(
+        logger.info(
             f"{Colors.OKCYAN}[INFO] Computing SHA-256 checksums...{Colors.ENDC}"
         )
         self.checksums = {}
@@ -228,7 +229,7 @@ class FAIRArchiveBuilder:
                 "Run the CoChem pipeline to generate .tex, .html, .parquet, "
                 "and .xyz outputs before archiving."
             )
-            print(f"{Colors.WARNING}[WARN] {msg}{Colors.ENDC}")
+            logger.info(f"{Colors.WARNING}[WARN] {msg}{Colors.ENDC}")
             logging.warning(msg)
             return self.output_path
 
@@ -239,7 +240,7 @@ class FAIRArchiveBuilder:
         manifest = self.build_manifest()
 
         # 4. Write ZIP
-        print(
+        logger.info(
             f"{Colors.OKCYAN}[INFO] Building {self.output_path.name}...{Colors.ENDC}"
         )
         try:
@@ -271,11 +272,11 @@ class FAIRArchiveBuilder:
             )
 
             total = len(self.collected_files)
-            print(
+            logger.info(
                 f"{Colors.OKGREEN}[OK] FAIR archive created: "
                 f"{self.output_path.name} ({total} files){Colors.ENDC}"
             )
-            print(
+            logger.info(
                 f"{Colors.OKGREEN}   SHA-256 signature: "
                 f"{sig_path.name}{Colors.ENDC}"
             )
@@ -285,7 +286,7 @@ class FAIRArchiveBuilder:
             )
 
         except Exception as e:
-            print(
+            logger.info(
                 f"{Colors.FAIL}[FAIL] Failed to create FAIR archive: {e}{Colors.ENDC}"
             )
             logging.error(f"FAIR archive creation failed: {e}")
@@ -310,14 +311,24 @@ def build_fair_archive(
 
 
 def main() -> None:
-    print(
+    logger.info(
         f"\n{Colors.BOLD}--- CoChem-SCRIBE: FAIR Publication Archive Builder ---{Colors.ENDC}"
     )
     archive_path = build_fair_archive()
-    print(
+    logger.info(
         f"\n{Colors.BOLD}Archive location: {archive_path.absolute()}{Colors.ENDC}\n"
     )
 
 
 if __name__ == "__main__":
     main()
+def calculate_artifact_sha256(filepath: str | Path) -> str:
+    """Calculates SHA-256 hash of a computational artifact."""
+    p = Path(filepath)
+    if not p.exists():
+        raise FileNotFoundError(f"Artifact file not found: {filepath}")
+    hasher = hashlib.sha256()
+    with open(p, "rb") as f:
+        while chunk := f.read(65536):
+            hasher.update(chunk)
+    return hasher.hexdigest()

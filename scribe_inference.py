@@ -1,3 +1,5 @@
+import hashlib
+from typing import Any, Dict, List, Optional
 #!/usr/bin/env python3
 """
 CoChem-SCRIBE: Inference Engine (Stage 6.5)
@@ -11,6 +13,7 @@ import sys
 import json
 import time
 import logging
+logger = logging.getLogger(__name__)
 import urllib.request
 from urllib.error import URLError, HTTPError
 from pathlib import Path
@@ -30,7 +33,7 @@ logging.basicConfig(filename=str(artifact_dir / 'cochem_scribe_inference.log'), 
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 class ScribeInferenceEngine:
-    def __init__(self):
+    def __init__(self) -> None:
         self.input_payload = Path("scribe_prompt_payload.txt")
         self.output_md = Path("CoChem_User_Guide.md")
         self.results_discussion_file = Path("Results_and_Discussion.md")
@@ -43,7 +46,7 @@ class ScribeInferenceEngine:
 
     def load_prompt(self) -> str:
         if not self.input_payload.exists():
-            print(f"{Colors.WARNING}[WARN] Prompt payload '{self.input_payload.name}' missing. Generating default payload...{Colors.ENDC}")
+            logger.info(f"{Colors.WARNING}[WARN] Prompt payload '{self.input_payload.name}' missing. Generating default payload...{Colors.ENDC}")
             return "Generate CoChem User Guide documentation."
         with open(self.input_payload, "r", encoding="utf-8") as f:
             return f.read()
@@ -71,7 +74,7 @@ class ScribeInferenceEngine:
 
     def _generate_results_discussion_prompt(self) -> str:
         """Generates a prompt specifically for Results and Discussion section."""
-        print(f"{Colors.OKCYAN}[INFO] Generating Results & Discussion prompt with Bayesian parameters...{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}[INFO] Generating Results & Discussion prompt with Bayesian parameters...{Colors.ENDC}")
         params = self._extract_spotify_parameters()
         
         param_summary = "No specific parameters extracted from HDF5.\n"
@@ -83,16 +86,16 @@ class ScribeInferenceEngine:
         prompt = f"""You are an expert computational chemist and manuscript writer. Your task is to write the "Results & Discussion" section for a CoChem pipeline execution report, based on the Bayesian SpycFit parameters and other computational results provided below.
 
 CRITICAL INSTRUCTIONS:
-1. Write in formal scientific tone appropriate for a journal article
+    1. Write in formal scientific tone appropriate for a journal article
 2. Reference specific computational methods from Methodology.tex
 3. Use the actual parameter values from the HDF5 tensor when available
 4. If running in offline mode, explicitly include a watermark stating that AI interpretation was bypassed
 
 PARAMETER SUMMARY FROM PIPELINE EXECUTION:
-{param_summary}
+    {param_summary}
 
 SPECIFIC REQUIREMENTS FOR THIS SECTION:
-1. Analyze the computational results in the context of the methodology used
+    1. Analyze the computational results in the context of the methodology used
 2. Discuss the significance of the identified global minimum
 3. Explain any kinetic barriers found in the reaction pathway
 4. Interpret the rotational constants and their implications
@@ -107,7 +110,7 @@ Begin writing the "Results & Discussion" section now.
         Resolves SCRIBE-09: Offline fallback engine rendering static Jinja2 manuscript templates
         when external LLM endpoints are unreachable or unconfigured.
         """
-        print(f"{Colors.WARNING}[WARN] Utilizing offline Jinja2 fallback template renderer for document generation.{Colors.ENDC}")
+        logger.info(f"{Colors.WARNING}[WARN] Utilizing offline Jinja2 fallback template renderer for document generation.{Colors.ENDC}")
         logging.info("Offline Jinja2 fallback engine activated.")
 
         params = self._extract_spotify_parameters()
@@ -150,7 +153,7 @@ Detailed methodology equations and BibTeX citations have been compiled into `Met
     def query_api(self, prompt: str) -> str:
         """Executes the POST request with robust exponential backoff and offline Jinja2 fallback."""
         if not self.api_key:
-            print(f"{Colors.WARNING}[WARN] GEMINI_API_KEY not configured. Triggering offline Jinja2 fallback.{Colors.ENDC}")
+            logger.info(f"{Colors.WARNING}[WARN] GEMINI_API_KEY not configured. Triggering offline Jinja2 fallback.{Colors.ENDC}")
             return self._fallback_offline_jinja_rendering(prompt)
 
         payload = {
@@ -161,7 +164,7 @@ Detailed methodology equations and BibTeX citations have been compiled into `Met
         req = urllib.request.Request(self.api_url, data=data, headers=headers, method='POST')
 
         delays = [1, 2, 4]
-        print(f"Sending payload to {self.model_name}...")
+        logger.info(f"Sending payload to {self.model_name}...")
 
         for attempt, delay in enumerate(delays):
             try:
@@ -174,33 +177,33 @@ Detailed methodology equations and BibTeX citations have been compiled into `Met
                 logging.error(f"API Request Failed (Attempt {attempt+1}/{len(delays)}): {e}")
                 time.sleep(delay)
 
-        print(f"{Colors.FAIL}[FAIL] API Error: Failed to generate content. Triggering Jinja2 offline engine.{Colors.ENDC}")
+        logger.info(f"{Colors.FAIL}[FAIL] API Error: Failed to generate content. Triggering Jinja2 offline engine.{Colors.ENDC}")
         return self._fallback_offline_jinja_rendering(prompt)
 
-    def generate_document(self):
+    def generate_document(self) -> Any:
         prompt = self.load_prompt()
         markdown_content = self.query_api(prompt)
 
         with open(self.output_md, "w", encoding="utf-8") as f:
             f.write(markdown_content)
 
-        print(f"{Colors.OKGREEN}[OK] CoChem User Guide successfully generated: {self.output_md.name}{Colors.ENDC}")
+        logger.info(f"{Colors.OKGREEN}[OK] CoChem User Guide successfully generated: {self.output_md.name}{Colors.ENDC}")
         logging.info("SCRIBE inference execution successfully finished.")
 
-    def generate_results_discussion(self):
+    def generate_results_discussion(self) -> Any:
         """Generates the Results and Discussion section specifically."""
-        print(f"{Colors.OKCYAN}[INFO] Generating Results & Discussion section...{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}[INFO] Generating Results & Discussion section...{Colors.ENDC}")
         prompt = self._generate_results_discussion_prompt()
         markdown_content = self.query_api(prompt)
 
         with open(self.results_discussion_file, "w", encoding="utf-8") as f:
             f.write(markdown_content)
 
-        print(f"{Colors.OKGREEN}[OK] Results & Discussion section generated: {self.results_discussion_file.name}{Colors.ENDC}")
+        logger.info(f"{Colors.OKGREEN}[OK] Results & Discussion section generated: {self.results_discussion_file.name}{Colors.ENDC}")
         logging.info("SCRIBE results and discussion generation successfully finished.")
 
-def main():
-    print(f"\n{Colors.BOLD}--- CoChem-SCRIBE: LLM Inference Engine ---{Colors.ENDC}")
+def main() -> Any:
+    logger.info(f"\n{Colors.BOLD}--- CoChem-SCRIBE: LLM Inference Engine ---{Colors.ENDC}")
     engine = ScribeInferenceEngine()
     if len(sys.argv) > 1 and sys.argv[1] == "generate_results_discussion":
         engine.generate_results_discussion()
@@ -209,3 +212,13 @@ def main():
 
 if __name__ == "__main__":
     main()
+def calculate_artifact_sha256(filepath: str | Path) -> str:
+    """Calculates SHA-256 hash of a computational artifact."""
+    p = Path(filepath)
+    if not p.exists():
+        raise FileNotFoundError(f"Artifact file not found: {filepath}")
+    hasher = hashlib.sha256()
+    with open(p, "rb") as f:
+        while chunk := f.read(65536):
+            hasher.update(chunk)
+    return hasher.hexdigest()

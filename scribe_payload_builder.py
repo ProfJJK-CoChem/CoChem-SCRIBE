@@ -1,3 +1,4 @@
+from typing import Any, Dict, List, Optional
 #!/usr/bin/env python3
 """
 CoChem-SCRIBE: Payload Builder (Stage 6.4)
@@ -10,12 +11,15 @@ import os
 import sys
 import json
 import logging
+logger = logging.getLogger(__name__)
 import re
 import requests
 import hashlib
 from pathlib import Path
 from datetime import datetime
 import h5py
+
+from cochem_base.config_loader import resolve_config_path
 
 class Colors:
     OKCYAN = '\033[96m'
@@ -42,7 +46,7 @@ def _is_derived_or_estimated_tag(tag_val) -> bool:
 def validate_standing_rule_7(payload: dict) -> list[str]:
     """
     Audits report payload for Standing Rule 7 violations (§12.5 Rule 7):
-    'No [D] or [E] value may be the sole support for a hardware exclusion, a routing gate, or an accuracy claim.'
+        'No [D] or [E] value may be the sole support for a hardware exclusion, a routing gate, or an accuracy claim.'
     Returns a list of violation warnings.
     """
     violations = []
@@ -51,7 +55,7 @@ def validate_standing_rule_7(payload: dict) -> list[str]:
 
     visited_ids = set()
 
-    def inspect_claim(claim: dict, context_gating: bool = False, context_accuracy: bool = False):
+    def inspect_claim(claim: dict, context_gating: bool = False, context_accuracy: bool = False) -> Any:
         if not isinstance(claim, dict):
             return
         claim_id = id(claim)
@@ -83,7 +87,7 @@ def validate_standing_rule_7(payload: dict) -> list[str]:
                 f"but is used to gate hardware or routing decisions without local [M] validation."
             )
 
-    def traverse(obj, context_gating: bool = False, context_accuracy: bool = False):
+    def traverse(obj, context_gating: bool = False, context_accuracy: bool = False) -> Any:
         if isinstance(obj, dict):
             has_claim_keys = any(k in obj for k in ("provenance", "provenance_tag", "used_as_routing_gate", "is_routing_gate", "is_gating", "is_accuracy_claim", "used_as_accuracy_claim"))
             if has_claim_keys:
@@ -126,8 +130,8 @@ def validate_standing_rule_7(payload: dict) -> list[str]:
 
 
 class ScribePayloadBuilder:
-    def __init__(self):
-        self.config_path = Path("cochem_system_config.json")
+    def __init__(self) -> None:
+        self.config_path = resolve_config_path()
         self.manifest_path = Path("cochem_deployment_manifest.json")
         self.h5_file_path = Path("cochem_state.h5")
         self.crossref_api_url = "https://api.crossref.org/works"
@@ -144,7 +148,7 @@ class ScribePayloadBuilder:
             return {}
         try:
             with open(filepath, "r", encoding="utf-8") as f:
-                return json.load(f)
+                return json.loads(f.read())
         except json.JSONDecodeError:
             logging.error(f"Corrupted JSON detected in {filepath.name}.")
             return {}
@@ -155,7 +159,7 @@ class ScribePayloadBuilder:
         Resolves SCRIBE-03: Multi-line regex parser matching keyword blocks and % block specs.
         Resolves SCRIBE-12: Extracts exact software version metadata.
         """
-        print(f"{Colors.OKCYAN}[INFO] Parsing execution logs for adaptive fallbacks and versioning...{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}[INFO] Parsing execution logs for adaptive fallbacks and versioning...{Colors.ENDC}")
         log_data = {
             'fallbacks': [],
             'dft_functionals': [],
@@ -238,7 +242,7 @@ class ScribePayloadBuilder:
         Resolves SCRIBE-11: Extracts relative free energies (delta G, delta H) from landscape HDF5
         into LaTeX tabular markup (manuscript_tables.tex).
         """
-        print(f"{Colors.OKCYAN}[INFO] Extracting relative energetics into manuscript_tables.tex...{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}[INFO] Extracting relative energetics into manuscript_tables.tex...{Colors.ENDC}")
         energetics = []
         
         h5_candidates = [self.h5_file_path, Path("landscape.h5")]
@@ -307,7 +311,7 @@ class ScribePayloadBuilder:
         Resolves SCRIBE-02: Loads external Jinja2 template from templates/ directory.
         Resolves SCRIBE-15: Automatically syncs and overwrites root Methodology.tex.
         """
-        print(f"{Colors.OKCYAN}[INFO] Generating APS-compliant Methodology.tex via Jinja2...{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}[INFO] Generating APS-compliant Methodology.tex via Jinja2...{Colors.ENDC}")
         from cochem_scribe_master import compute_state_tensor_provenance_hash
         
         provenance_payload = json.dumps(log_data, sort_keys=True).encode('utf-8')
@@ -361,12 +365,12 @@ class ScribePayloadBuilder:
         Queries CrossRef API for DOI citations with local SQLite/JSON caching.
         Resolves SCRIBE-01: Implements local crossref_cache.json to avoid network failures in air-gapped HPC.
         """
-        print(f"{Colors.OKCYAN}[INFO] Querying CrossRef API for citations (with cache)...{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}[INFO] Querying CrossRef API for citations (with cache)...{Colors.ENDC}")
         cache = {}
         if self.cache_path.exists():
             try:
                 with open(self.cache_path, 'r', encoding='utf-8') as f:
-                    cache = json.load(f)
+                    cache = json.loads(f.read())
             except Exception as e:
                 logging.warning(f"Could not load CrossRef cache: {e}")
 
@@ -446,7 +450,7 @@ class ScribePayloadBuilder:
         Generates complete manuscript.bib file from CrossRef results.
         Resolves SCRIBE-16: Dynamic parsing of journal name, volume, issue, pages, and publication year into BibTeX.
         """
-        print(f"{Colors.OKCYAN}[INFO] Generating manuscript.bib file...{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}[INFO] Generating manuscript.bib file...{Colors.ENDC}")
         bib_content = ""
         for term, citation in citations.items():
             if 'error' not in citation:
@@ -515,7 +519,7 @@ class ScribePayloadBuilder:
 
     def construct_user_guide_prompt(self) -> str:
         """Compiles the authoritative LLM Prompt for the User Guide."""
-        print(f"{Colors.OKCYAN}[INFO] Constructing enhanced user guide prompt with dynamic data...{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}[INFO] Constructing enhanced user guide prompt with dynamic data...{Colors.ENDC}")
         payload_data = self.get_payload()
         system_config = self._load_json_safe(self.config_path)
         manifest = self._load_json_safe(self.manifest_path)
@@ -559,7 +563,7 @@ class ScribePayloadBuilder:
 Your task is to generate the official `CoChem_User_Guide.md` for this specific deployment with enhanced content based on actual execution data and citations from the CrossRef API.
 
 CRITICAL INSTRUCTIONS:
-1. DO NOT hallucinate features. Only document the modules explicitly listed as active below.
+    1. DO NOT hallucinate features. Only document the modules explicitly listed as active below.
 2. Format the output in strict, professional Markdown.
 3. Include a "Hardware & Limitations" section using the exact telemetry provided below.
 4. Reference the generated Methodology.tex and manuscript.bib files for accurate citations and methodology details.
@@ -567,21 +571,21 @@ CRITICAL INSTRUCTIONS:
 
 ACTIVE DEPLOYMENT TELEMETRY
 SYSTEM HARDWARE:
-- Classification Tier: {classification}
+    - Classification Tier: {classification}
 - CPU Cores Available: {cpu_cores}
 - Physical RAM (GB): {ram_gb}
 - GPU Profile: {gpu_profile}
 
 ROUTING CONSTRAINTS:
-- Product Class: {product_class} (Class A: De Novo Absolute / Class B: Template-Anchored / Class C: Differences)
+    - Product Class: {product_class} (Class A: De Novo Absolute / Class B: Template-Anchored / Class C: Differences)
 - Tier Category: {tier_category} ({tier_tag})
 - Max MACE-OFF24m Batch Size: {mace_batch}
 
 PROVISIONED MODULES:
-{module_list_str}
+    {module_list_str}
 
 EXECUTION ANALYSIS RESULTS:
-- LAM Protocol Triggered: {'Yes' if log_data['lam_trigger'] else 'No'}
+    - LAM Protocol Triggered: {'Yes' if log_data['lam_trigger'] else 'No'}
 - Standing Rule 7 Audit: {'PASSED (No violations)' if not violations else f'{len(violations)} VIOLATIONS DETECTED'}
 - DFT Functionals Used: {', '.join(set(log_data['dft_functionals'])) if log_data['dft_functionals'] else 'None detected'}
 - Basis Sets Used: {', '.join(set(log_data['basis_sets'])) if log_data['basis_sets'] else 'None detected'}
@@ -590,19 +594,29 @@ Begin the markdown generation now.
 """
         return prompt
 
-def main():
-    print(f"\n{Colors.BOLD}--- CoChem-SCRIBE: Enhanced Payload Builder ---{Colors.ENDC}")
+def main() -> Any:
+    logger.info(f"\n{Colors.BOLD}--- CoChem-SCRIBE: Enhanced Payload Builder ---{Colors.ENDC}")
     builder = ScribePayloadBuilder()
     
-    print(f"{Colors.OKCYAN}Starting system registry harvesting for LLM context...{Colors.ENDC}")
+    logger.info(f"{Colors.OKCYAN}Starting system registry harvesting for LLM context...{Colors.ENDC}")
     final_prompt = builder.construct_user_guide_prompt()
     
     out_path = Path("scribe_prompt_payload.txt")
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(final_prompt)
         
-    print(f"{Colors.OKGREEN}Master Prompt successfully compiled to {out_path.name}{Colors.ENDC}")
+    logger.info(f"{Colors.OKGREEN}Master Prompt successfully compiled to {out_path.name}{Colors.ENDC}")
     logging.info(f"Generated user guide prompt constraint payload (Length: {len(final_prompt)} chars).")
 
 if __name__ == "__main__":
     main()
+def calculate_artifact_sha256(filepath: str | Path) -> str:
+    """Calculates SHA-256 hash of a computational artifact."""
+    p = Path(filepath)
+    if not p.exists():
+        raise FileNotFoundError(f"Artifact file not found: {filepath}")
+    hasher = hashlib.sha256()
+    with open(p, "rb") as f:
+        while chunk := f.read(65536):
+            hasher.update(chunk)
+    return hasher.hexdigest()

@@ -1,3 +1,5 @@
+import hashlib
+from typing import Any, Dict, List, Optional
 #!/usr/bin/env python3
 """
 CoChem-SCRIBE: Figure Generator (Stage 6.2)
@@ -21,6 +23,7 @@ import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
 import logging
+logger = logging.getLogger(__name__)
 import json
 import zstandard as zstd
 from datetime import datetime
@@ -39,15 +42,15 @@ logging.basicConfig(filename=str(artifact_dir / 'cochem_scribe_figures.log'), le
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 class ScribeFigureGenerator:
-    def __init__(self):
+    def __init__(self) -> None:
         self.h5_file_path = Path("cochem_state.h5")
         self.output_dir = Path("generated_figures")
         self.output_dir.mkdir(exist_ok=True)
         self.figures_generated = 0
 
-    def _generate_topos_artifacts(self):
+    def _generate_topos_artifacts(self) -> Any:
         """Generates TOPOS artifacts: 3D carousels, NCI domains, etc."""
-        print(f"{Colors.OKCYAN}[INFO] Generating TOPOS visualization artifacts...{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}[INFO] Generating TOPOS visualization artifacts...{Colors.ENDC}")
         
         try:
             if not self.h5_file_path.exists():
@@ -69,7 +72,7 @@ class ScribeFigureGenerator:
         except Exception as e:
             logging.error(f"Error generating TOPOS artifacts: {e}")
 
-    def _generate_isomer_3d(self, geometry_data, isomer_name):
+    def _generate_isomer_3d(self, geometry_data, isomer_name) -> Any:
         """Generate 3D visualization of an isomer."""
         try:
             fig = go.Figure()
@@ -92,7 +95,7 @@ class ScribeFigureGenerator:
         except Exception as e:
             logging.error(f"Error generating 3D isomer {isomer_name}: {e}")
 
-    def _generate_chiral_bucket_table(self, buckets):
+    def _generate_chiral_bucket_table(self, buckets) -> Any:
         """Generate LaTeX table for chiral bucket distributions."""
         try:
             table_content = "\\begin{table}[h]\n\\centering\n\\caption{Enantiomeric Excess Distribution}\n\\begin{tabular}{|c|c|}\n\\hline\nIsomer & Enantiomeric Excess \\\\\\hline\n"
@@ -110,9 +113,9 @@ class ScribeFigureGenerator:
         except Exception as e:
             logging.error(f"Error generating chiral bucket table: {e}")
 
-    def _generate_torq_artifacts(self):
+    def _generate_torq_artifacts(self) -> Any:
         """Generates TORQ artifacts: Sinc-DVR wavefunctions, IR spectra, etc."""
-        print(f"{Colors.OKCYAN}[INFO] Generating TORQ visualization artifacts...{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}[INFO] Generating TORQ visualization artifacts...{Colors.ENDC}")
         try:
             if not self.h5_file_path.exists():
                 logging.warning("cochem_state.h5 not found for TORQ artifacts")
@@ -131,7 +134,7 @@ class ScribeFigureGenerator:
         except Exception as e:
             logging.error(f"Error generating TORQ artifacts: {e}")
 
-    def _generate_dvr_probability_maps(self, wavefunctions):
+    def _generate_dvr_probability_maps(self, wavefunctions) -> Any:
         try:
             fig = go.Figure()
             if len(wavefunctions) > 0:
@@ -147,7 +150,7 @@ class ScribeFigureGenerator:
         except Exception as e:
             logging.error(f"Error generating DVR probability maps: {e}")
 
-    def _generate_pes_contour_maps(self, pes_data):
+    def _generate_pes_contour_maps(self, pes_data) -> Any:
         try:
             fig = go.Figure()
             if len(pes_data) > 0 and len(pes_data.shape) >= 2:
@@ -161,7 +164,7 @@ class ScribeFigureGenerator:
         except Exception as e:
             logging.error(f"Error generating PES contour maps: {e}")
 
-    def _generate_ir_comparison_plot(self, ir_data):
+    def _generate_ir_comparison_plot(self, ir_data) -> Any:
         try:
             fig = go.Figure()
             if len(ir_data) >= 2:
@@ -176,8 +179,8 @@ class ScribeFigureGenerator:
         except Exception as e:
             logging.error(f"Error generating IR comparison plot: {e}")
 
-    def _generate_spYcFit_artifacts(self):
-        print(f"{Colors.OKCYAN}[INFO] Generating SpycFit visualization artifacts...{Colors.ENDC}")
+    def _generate_spYcFit_artifacts(self) -> Any:
+        logger.info(f"{Colors.OKCYAN}[INFO] Generating SpycFit visualization artifacts...{Colors.ENDC}")
         try:
             if not self.h5_file_path.exists():
                 logging.warning("cochem_state.h5 not found for SpycFit artifacts")
@@ -192,7 +195,7 @@ class ScribeFigureGenerator:
         except Exception as e:
             logging.error(f"Error generating SpycFit artifacts: {e}")
 
-    def _generate_bayesian_convergence_plot(self, conv_data):
+    def _generate_bayesian_convergence_plot(self, conv_data) -> Any:
         try:
             fig = go.Figure()
             if len(conv_data) > 0:
@@ -204,7 +207,7 @@ class ScribeFigureGenerator:
         except Exception as e:
             logging.error(f"Error generating Bayesian convergence plot: {e}")
 
-    def _generate_loio_boxplot(self, loio_data):
+    def _generate_loio_boxplot(self, loio_data) -> Any:
         try:
             fig = go.Figure()
             if len(loio_data) > 0:
@@ -216,7 +219,7 @@ class ScribeFigureGenerator:
         except Exception as e:
             logging.error(f"Error generating LOIO boxplot: {e}")
 
-    def _generate_voigt_spectrum(self, spec_data):
+    def _generate_voigt_spectrum(self, spec_data) -> Any:
         try:
             fig = go.Figure()
             if len(spec_data) >= 2:
@@ -228,8 +231,8 @@ class ScribeFigureGenerator:
         except Exception as e:
             logging.error(f"Error generating Voigt spectrum: {e}")
 
-    def _generate_mass_spectrometry_artifacts(self):
-        print(f"{Colors.OKCYAN}[INFO] Generating mass spectrometry visualization artifacts...{Colors.ENDC}")
+    def _generate_mass_spectrometry_artifacts(self) -> Any:
+        logger.info(f"{Colors.OKCYAN}[INFO] Generating mass spectrometry visualization artifacts...{Colors.ENDC}")
         try:
             qcxms_files = list(Path(".").glob("*.res"))
             if len(qcxms_files) > 0:
@@ -238,7 +241,7 @@ class ScribeFigureGenerator:
         except Exception as e:
             logging.error(f"Error generating mass spectrometry artifacts: {e}")
 
-    def _parse_qcxms_file(self, res_file):
+    def _parse_qcxms_file(self, res_file) -> Any:
         try:
             fig = go.Figure()
             mz_values = [100, 120, 140, 160, 180]
@@ -251,19 +254,29 @@ class ScribeFigureGenerator:
         except Exception as e:
             logging.error(f"Error parsing QCxMS file {res_file}: {e}")
 
-    def generate_all_artifacts(self):
-        print(f"{Colors.OKCYAN}[INFO] Generating all publication-ready artifacts...{Colors.ENDC}")
+    def generate_all_artifacts(self) -> Any:
+        logger.info(f"{Colors.OKCYAN}[INFO] Generating all publication-ready artifacts...{Colors.ENDC}")
         self._generate_topos_artifacts()
         self._generate_torq_artifacts()
         self._generate_spYcFit_artifacts()
         self._generate_mass_spectrometry_artifacts()
-        print(f"{Colors.OKGREEN}[OK] Generated {self.figures_generated} visualization artifacts.{Colors.ENDC}")
+        logger.info(f"{Colors.OKGREEN}[OK] Generated {self.figures_generated} visualization artifacts.{Colors.ENDC}")
         logging.info(f"Total figures generated: {self.figures_generated}")
 
-def main():
-    print(f"\n{Colors.BOLD}--- CoChem-SCRIBE: Figure Generator ---{Colors.ENDC}")
+def main() -> Any:
+    logger.info(f"\n{Colors.BOLD}--- CoChem-SCRIBE: Figure Generator ---{Colors.ENDC}")
     generator = ScribeFigureGenerator()
     generator.generate_all_artifacts()
 
 if __name__ == "__main__":
     main()
+def calculate_artifact_sha256(filepath: str | Path) -> str:
+    """Calculates SHA-256 hash of a computational artifact."""
+    p = Path(filepath)
+    if not p.exists():
+        raise FileNotFoundError(f"Artifact file not found: {filepath}")
+    hasher = hashlib.sha256()
+    with open(p, "rb") as f:
+        while chunk := f.read(65536):
+            hasher.update(chunk)
+    return hasher.hexdigest()

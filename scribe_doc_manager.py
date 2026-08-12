@@ -1,3 +1,5 @@
+import hashlib
+from typing import Any, Dict, List, Optional
 #!/usr/bin/env python3
 """
 CoChem-SCRIBE: Document Manager (Stage 6.3)
@@ -9,6 +11,7 @@ import os
 import sys
 import shutil
 import logging
+logger = logging.getLogger(__name__)
 import asyncio
 import tarfile
 import h5py
@@ -17,6 +20,8 @@ from datetime import datetime
 from pathlib import Path
 import threading
 import time
+
+from cochem_base.config_loader import resolve_config_path
 
 class Colors:
     OKCYAN = '\033[96m'
@@ -32,7 +37,7 @@ logging.basicConfig(filename=str(artifact_dir / 'cochem_scribe_manager.log'), le
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 class ScribeDocumentManager:
-    def __init__(self):
+    def __init__(self) -> None:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.archive_dir = Path(f"Report_Archive/Run_{timestamp}")
         self.archive_dir.mkdir(parents=True, exist_ok=True)
@@ -53,20 +58,20 @@ class ScribeDocumentManager:
         self.is_monitoring = False
         self.monitoring_thread = None
 
-    def start_background_daemon(self):
+    def start_background_daemon(self) -> Any:
         """Starts the asynchronous monitoring daemon."""
-        print(f"{Colors.OKCYAN}[INFO] Starting CoChem-SCRIBE background daemon...{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}[INFO] Starting CoChem-SCRIBE background daemon...{Colors.ENDC}")
         self.is_monitoring = True
         self.monitoring_thread = threading.Thread(target=self._monitor_hdf5_memory, daemon=True)
         self.monitoring_thread.start()
         logging.info("Background daemon started successfully.")
 
-    def _monitor_hdf5_memory(self):
+    def _monitor_hdf5_memory(self) -> Any:
         """
         Monitors HDF5 tensor memory usage.
         Resolves SCRIBE-13: Reduced polling thread overhead with event loop sleep checks.
         """
-        print(f"{Colors.OKCYAN}[INFO] Monitoring HDF5 tensor memory usage (event-driven)...{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}[INFO] Monitoring HDF5 tensor memory usage (event-driven)...{Colors.ENDC}")
         last_mtime = 0
         while self.is_monitoring:
             try:
@@ -76,14 +81,14 @@ class ScribeDocumentManager:
                         last_mtime = st.st_mtime
                         current_size = st.st_size / (1024 * 1024)
                         if current_size >= self.memory_threshold_mb:
-                            print(f"{Colors.WARNING}[WARN] Memory threshold exceeded ({current_size:.2f} MB){Colors.ENDC}")
+                            logger.info(f"{Colors.WARNING}[WARN] Memory threshold exceeded ({current_size:.2f} MB){Colors.ENDC}")
                             self._flush_hdf5_chunks()
                 time.sleep(2)
             except Exception as e:
                 logging.error(f"Error in HDF5 monitoring: {e}")
                 time.sleep(2)
 
-    def _flush_hdf5_chunks(self):
+    def _flush_hdf5_chunks(self) -> Any:
         """Flushes HDF5 data to compressed chunks using Zstandard."""
         try:
             if not self.h5_file_path.exists():
@@ -94,14 +99,14 @@ class ScribeDocumentManager:
             
             with h5py.File(self.h5_file_path, 'r') as f:
                 datasets = []
-                def collect_datasets(name, obj):
+                def collect_datasets(name, obj) -> Any:
                     if isinstance(obj, h5py.Dataset):
                         datasets.append((name, obj))
                 
                 f.visititems(collect_datasets)
                 
                 for dataset_name, dataset in datasets:
-                    print(f"[INFO] Compressing dataset: {dataset_name}...")
+                    logger.info(f"[INFO] Compressing dataset: {dataset_name}...")
                     chunk_file_path = chunk_dir / f"{Path(dataset_name).name}.tar.zst"
                     self._compress_dataset_chunked(dataset, chunk_file_path)
                     
@@ -110,7 +115,7 @@ class ScribeDocumentManager:
         except Exception as e:
             logging.error(f"Error flushing HDF5 chunks: {e}")
 
-    def _compress_dataset_chunked(self, dataset, output_path):
+    def _compress_dataset_chunked(self, dataset, output_path) -> Any:
         """
         Compresses a large dataset in chunks to avoid RAM saturation.
         Resolves SCRIBE-04: Iterates over HDF5 dataset in slices dataset[i:i+chunk_size]
@@ -142,11 +147,11 @@ class ScribeDocumentManager:
         Moves targeted generated documents and registries into the archive.
         Resolves SCRIBE-17: Recursive log file harvesting Path(".").rglob("*.log").
         """
-        print(f"[INFO] Harvesting artifacts into {self.archive_dir}...")
+        logger.info(f"[INFO] Harvesting artifacts into {self.archive_dir}...")
         harvested_count = 0
         
         for file_name in self.target_artifacts:
-            src = Path(file_name)
+            src = resolve_config_path() if file_name == "cochem_system_config.json" else Path(file_name)
             if src.exists():
                 dst = self.archive_dir / src.name
                 shutil.copy2(src, dst)
@@ -167,12 +172,12 @@ class ScribeDocumentManager:
                 
         return harvested_count
 
-    def generate_final_payload(self):
+    def generate_final_payload(self) -> Any:
         """
         Generates the final Zstandard-compressed payload with all artifacts.
         Resolves SCRIBE-05: Streams archive creation directly without full in-memory tar buffer.
         """
-        print(f"[INFO] Generating final Zstandard-compressed payload...")
+        logger.info(f"[INFO] Generating final Zstandard-compressed payload...")
         try:
             final_archive = self.archive_dir.with_suffix('.tar.zst')
             
@@ -193,15 +198,15 @@ class ScribeDocumentManager:
                     if temp_tar.exists():
                         temp_tar.unlink()
                     
-            print(f"{Colors.OKGREEN}[OK] Final payload successfully created: {final_archive.name}{Colors.ENDC}")
+            logger.info(f"{Colors.OKGREEN}[OK] Final payload successfully created: {final_archive.name}{Colors.ENDC}")
             logging.info(f"Final payload successfully compressed to {final_archive.name}")
             
         except Exception as e:
-            print(f"{Colors.FAIL}[FAIL] Failed to generate final payload: {e}{Colors.ENDC}")
+            logger.info(f"{Colors.FAIL}[FAIL] Failed to generate final payload: {e}{Colors.ENDC}")
             logging.error(f"Final payload generation error: {e}")
 
-def main():
-    print(f"\n{Colors.BOLD}--- CoChem-SCRIBE: Asynchronous Document Manager ---{Colors.ENDC}")
+def main() -> Any:
+    logger.info(f"\n{Colors.BOLD}--- CoChem-SCRIBE: Asynchronous Document Manager ---{Colors.ENDC}")
     
     manager = ScribeDocumentManager()
     manager.start_background_daemon()
@@ -210,19 +215,29 @@ def main():
     
     count = manager.harvest_artifacts()
     if count == 0:
-        print(f"{Colors.WARNING}Warning: No CoChem artifacts found in root directory.{Colors.ENDC}")
+        logger.info(f"{Colors.WARNING}Warning: No CoChem artifacts found in root directory.{Colors.ENDC}")
     else:
-        print(f"{Colors.OKCYAN}Harvested {count} output files and logs.{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}Harvested {count} output files and logs.{Colors.ENDC}")
         manager.generate_final_payload()
         
     manager.is_monitoring = False
     if manager.monitoring_thread:
         manager.monitoring_thread.join(timeout=2)
     
-    print(f"{Colors.BOLD}======================================================{Colors.ENDC}")
-    print(f"{Colors.OKGREEN}{Colors.BOLD}   CoChem Pipeline Execution Fully Concluded! {Colors.ENDC}")
-    print(f"{Colors.BOLD}======================================================{Colors.ENDC}\n")
+        logger.info(f"{Colors.BOLD}======================================================{Colors.ENDC}")
+logger.info(f"{Colors.OKGREEN}{Colors.BOLD}   CoChem Pipeline Execution Fully Concluded! {Colors.ENDC}")
+logger.info(f"{Colors.BOLD}======================================================{Colors.ENDC}\n")
 
 # Resolves SCRIBE-06: Clean single main entry point
 if __name__ == "__main__":
     main()
+def calculate_artifact_sha256(filepath: str | Path) -> str:
+    """Calculates SHA-256 hash of a computational artifact."""
+    p = Path(filepath)
+    if not p.exists():
+        raise FileNotFoundError(f"Artifact file not found: {filepath}")
+    hasher = hashlib.sha256()
+    with open(p, "rb") as f:
+        while chunk := f.read(65536):
+            hasher.update(chunk)
+    return hasher.hexdigest()

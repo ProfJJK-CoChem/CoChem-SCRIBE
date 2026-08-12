@@ -1,3 +1,4 @@
+from typing import Any, Dict, List, Optional
 #!/usr/bin/env python3
 """
 CoChem-SCRIBE: Legacy Verification Bundler (Stage 6.6)
@@ -10,11 +11,12 @@ import sys
 import zipfile
 import hashlib
 import logging
+logger = logging.getLogger(__name__)
 from pathlib import Path
 import zstandard as zstd
 import numpy as np
 
-def calculate_rotational_constants(symbols=None, coords=None):
+def calculate_rotational_constants(symbols=None, coords=None) -> Any:
     if symbols is None or coords is None:
         symbols = ["O", "H", "H"]
         coords = np.array([[0.0, 0.0, 0.1173], [0.0, 0.7572, -0.4692], [0.0, -0.7572, -0.4692]])
@@ -50,14 +52,14 @@ logging.basicConfig(filename=str(artifact_dir / 'cochem_scribe_legacy.log'), lev
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 class LegacyVerificationBundler:
-    def __init__(self):
+    def __init__(self) -> None:
         self.legacy_files = []
         self.target_extensions = ['.lin', '.cat', '.fit']
         self.output_zip = Path("Legacy_Verification.zip")
         
-    def find_legacy_files(self):
+    def find_legacy_files(self) -> Any:
         """Finds all Pickett .lin, .cat, and .fit files in the working directory."""
-        print(f"{Colors.OKCYAN}[INFO] Searching for legacy spectroscopy files...{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}[INFO] Searching for legacy spectroscopy files...{Colors.ENDC}")
         work_dir = Path(".")
         found_files = []
         
@@ -72,7 +74,7 @@ class LegacyVerificationBundler:
                     found_files.append(file_path)
                     self.legacy_files.append(file_path)
                     
-        print(f"{Colors.OKGREEN}[OK] Found {len(self.legacy_files)} legacy files.{Colors.ENDC}")
+        logger.info(f"{Colors.OKGREEN}[OK] Found {len(self.legacy_files)} legacy files.{Colors.ENDC}")
         logging.info(f"Found {len(self.legacy_files)} legacy files.")
 
     def compress_zstd_legacy_file(self, file_path: Path) -> Path:
@@ -86,13 +88,13 @@ class LegacyVerificationBundler:
                 f_out.write(cctx.compress(f_in.read()))
         return zst_path
         
-    def create_legacy_bundle(self):
+    def create_legacy_bundle(self) -> Any:
         """
         Creates the Legacy_Verification.zip bundle with Pickett files.
         Resolves SCRIBE-10: Computes SHA-256 checksums and includes checksums.sha256 manifest.
         Resolves SCRIBE-20: Produces Zstandard compressed .zst archives.
         """
-        print(f"{Colors.OKCYAN}[INFO] Creating Legacy Verification bundle...{Colors.ENDC}")
+        logger.info(f"{Colors.OKCYAN}[INFO] Creating Legacy Verification bundle...{Colors.ENDC}")
         
         if not self.legacy_files:
             A, B, C = calculate_rotational_constants()
@@ -132,15 +134,15 @@ class LegacyVerificationBundler:
                     zipf.write(zst_p, arcname=zst_p.name)
                 zipf.write(checksum_file, arcname=checksum_file.name)
                     
-            print(f"{Colors.OKGREEN}[OK] Legacy Verification bundle created: {self.output_zip.name}{Colors.ENDC}")
+            logger.info(f"{Colors.OKGREEN}[OK] Legacy Verification bundle created: {self.output_zip.name}{Colors.ENDC}")
             logging.info("Legacy verification bundle created successfully with checksums and Zstd compression.")
             
         except Exception as e:
-            print(f"{Colors.FAIL}[FAIL] Failed to create legacy bundle: {e}{Colors.ENDC}")
+            logger.info(f"{Colors.FAIL}[FAIL] Failed to create legacy bundle: {e}{Colors.ENDC}")
             logging.error(f"Failed to create legacy bundle: {e}")
 
-def main():
-    print(f"\n{Colors.BOLD}--- CoChem-SCRIBE: Legacy Verification Bundler ---{Colors.ENDC}")
+def main() -> Any:
+    logger.info(f"\n{Colors.BOLD}--- CoChem-SCRIBE: Legacy Verification Bundler ---{Colors.ENDC}")
     
     bundler = LegacyVerificationBundler()
     bundler.find_legacy_files()
@@ -148,3 +150,13 @@ def main():
 
 if __name__ == "__main__":
     main()
+def calculate_artifact_sha256(filepath: str | Path) -> str:
+    """Calculates SHA-256 hash of a computational artifact."""
+    p = Path(filepath)
+    if not p.exists():
+        raise FileNotFoundError(f"Artifact file not found: {filepath}")
+    hasher = hashlib.sha256()
+    with open(p, "rb") as f:
+        while chunk := f.read(65536):
+            hasher.update(chunk)
+    return hasher.hexdigest()

@@ -1,3 +1,5 @@
+import hashlib
+from typing import Any, Dict, List, Optional
 #!/usr/bin/env python3
 """
 PyTest Suite for CoChem-SCRIBE
@@ -21,13 +23,13 @@ import scribe_figure_generator
 import scribe_inference
 import scribe_legacy_bundler
 
-def test_payload_builder_crossref_caching():
+def test_payload_builder_crossref_caching() -> None:
     builder = scribe_payload_builder.ScribePayloadBuilder()
     cits = builder._query_crossref_citations(['Grimme D4'])
     assert 'Grimme D4' in cits
     assert Path("crossref_cache.json").exists()
 
-def test_payload_builder_bibtex_generation():
+def test_payload_builder_bibtex_generation() -> None:
     builder = scribe_payload_builder.ScribePayloadBuilder()
     cits = {
         'TestTheory': {
@@ -45,13 +47,13 @@ def test_payload_builder_bibtex_generation():
     assert "J. Chem. Phys." in bib
     assert "10.1063/1.12345" in bib
 
-def test_extract_energetics_table():
+def test_extract_energetics_table() -> None:
     builder = scribe_payload_builder.ScribePayloadBuilder()
     tbl = builder.extract_energetics_table()
     assert "\\begin{table}" in tbl
     assert Path("manuscript_tables.tex").exists()
 
-def test_doc_manager_chunked_compression():
+def test_doc_manager_chunked_compression() -> None:
     with tempfile.TemporaryDirectory() as tmpdir:
         out_zst = Path(tmpdir) / "test_data.tar.zst"
         manager = scribe_doc_manager.ScribeDocumentManager()
@@ -60,13 +62,13 @@ def test_doc_manager_chunked_compression():
         class MockDataset:
             shape = (100,)
             name = "mock_ds"
-            def __getitem__(self, idx):
+            def __getitem__(self, idx) -> Any:
                 return range(100)[idx]
                 
         manager._compress_dataset_chunked(MockDataset(), out_zst)
         assert out_zst.exists()
 
-def test_legacy_bundler_checksum_and_zstd():
+def test_legacy_bundler_checksum_and_zstd() -> None:
     bundler = scribe_legacy_bundler.LegacyVerificationBundler()
     mock_lin = Path("test_output.lin")
     mock_lin.write_text("1 0 1 0 0 0 12500.00 0.05 1.0\n")
@@ -86,23 +88,23 @@ def test_legacy_bundler_checksum_and_zstd():
     if mock_lin.exists():
         mock_lin.unlink()
 
-def test_figure_generator():
+def test_figure_generator() -> None:
     generator = scribe_figure_generator.ScribeFigureGenerator()
     generator.generate_all_artifacts()
     assert generator.output_dir.exists()
 
-def test_inference_engine_offline_fallback():
+def test_inference_engine_offline_fallback() -> None:
     engine = scribe_inference.ScribeInferenceEngine()
     engine.api_key = ""
     res = engine._fallback_offline_jinja_rendering()
     assert "Notice: Generated via Offline Fallback Engine" in res
 
-def test_orchestration_structure():
+def test_orchestration_structure() -> None:
     orch = scribe_orchestration.ScribeOrchestrator()
     assert hasattr(orch, 'run_command')
     assert hasattr(orch, 'spawn_daemon')
 
-def test_cochem_scribe_compiler():
+def test_cochem_scribe_compiler() -> None:
     import h5py
     from cochem_scribe_compiler import ScribeCompiler
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -124,7 +126,7 @@ def test_cochem_scribe_compiler():
         assert "conformer_001" in tex
         assert out_tex.exists()
 
-def test_cochem_scribe_master():
+def test_cochem_scribe_master() -> None:
     from cochem_scribe_master import MethodologyTracker
     tracker = MethodologyTracker()
     tracker.compute_flags = {"MPQC_4", "MACE_OFF24m", "CCSD(T)-F12"}
@@ -138,7 +140,7 @@ def test_cochem_scribe_master():
     if Path("test_references.bib").exists():
         Path("test_references.bib").unlink()
 
-def test_state_tensor_provenance_hash():
+def test_state_tensor_provenance_hash() -> None:
     import h5py
     import numpy as np
     from cochem_scribe_master import compute_state_tensor_provenance_hash
@@ -156,7 +158,7 @@ def test_state_tensor_provenance_hash():
         digest2 = compute_state_tensor_provenance_hash(h5_path)
         assert digest1 != digest2
 
-def test_siunitx_table_formatting():
+def test_siunitx_table_formatting() -> None:
     from cochem_scribe_compiler import ScribeCompiler
     import h5py
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -170,7 +172,7 @@ def test_siunitx_table_formatting():
         assert "\\usepackage{siunitx}" in tex
         assert "S[table-format=" in tex
 
-def test_validate_standing_rule_7():
+def test_validate_standing_rule_7() -> None:
     from scribe_payload_builder import validate_standing_rule_7
     violating_payload = {
         'accuracy_claims': [
@@ -190,12 +192,12 @@ def test_validate_standing_rule_7():
     }
     assert len(validate_standing_rule_7(valid_payload)) == 0
 
-def test_method_paragraphs_provenance_tags():
+def test_method_paragraphs_provenance_tags() -> None:
     from cochem_scribe_master import METHOD_PARAGRAPHS
     for key, text in METHOD_PARAGRAPHS.items():
         assert any(tag in text for tag in ["[M]", "[D]", "[E]"]), f"Missing provenance tag in METHOD_PARAGRAPHS[{key}]"
 
-def test_state_tensor_provenance_hash_audit():
+def test_state_tensor_provenance_hash_audit() -> None:
     import h5py
     import numpy as np
     from cochem_scribe_master import compute_state_tensor_provenance_hash
@@ -214,7 +216,7 @@ def test_state_tensor_provenance_hash_audit():
             assert audit["[M]"] >= 1
             assert audit["[D]"] >= 1
 
-def test_payload_builder_v4_schema():
+def test_payload_builder_v4_schema() -> None:
     builder = scribe_payload_builder.ScribePayloadBuilder()
     payload = builder.get_payload()
     assert "product_class" in payload
@@ -228,13 +230,13 @@ def test_payload_builder_v4_schema():
     assert "Product Class" in prompt
     assert "Standing Rule 7 Audit" in prompt
 
-def test_scribe_orchestration_v4_tiers():
+def test_scribe_orchestration_v4_tiers() -> None:
     orch = scribe_orchestration.ScribeOrchestrator()
     assert hasattr(orch, 'tier_categories')
     assert "T1" in orch.tier_categories
     assert "T4" in orch.tier_categories
 
-def test_validate_standing_rule_7_dict_and_nested_claims():
+def test_validate_standing_rule_7_dict_and_nested_claims() -> None:
     from scribe_payload_builder import validate_standing_rule_7
     nested_dict_payload = {
         "modules": {
@@ -253,7 +255,7 @@ def test_validate_standing_rule_7_dict_and_nested_claims():
     assert len(violations) == 1
     assert "Dict structured estimated gate" in violations[0]
 
-def test_group_attribute_provenance_hash_and_exact_counting():
+def test_group_attribute_provenance_hash_and_exact_counting() -> None:
     import h5py
     import numpy as np
     from cochem_scribe_master import compute_state_tensor_provenance_hash
@@ -280,3 +282,13 @@ def test_group_attribute_provenance_hash_and_exact_counting():
 
 
 
+def calculate_artifact_sha256(filepath: str | Path) -> str:
+    """Calculates SHA-256 hash of a computational artifact."""
+    p = Path(filepath)
+    if not p.exists():
+        raise FileNotFoundError(f"Artifact file not found: {filepath}")
+    hasher = hashlib.sha256()
+    with open(p, "rb") as f:
+        while chunk := f.read(65536):
+            hasher.update(chunk)
+    return hasher.hexdigest()

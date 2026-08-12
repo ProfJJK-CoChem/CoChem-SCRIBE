@@ -1,3 +1,4 @@
+from typing import Any, Dict, List, Optional
 #!/usr/bin/env python3
 """
 CoChem-SCRIBE: Methodology Tracker & Master Document Compiler
@@ -10,6 +11,7 @@ import os
 import sys
 import json
 import logging
+logger = logging.getLogger(__name__)
 import re
 import hashlib
 from pathlib import Path
@@ -17,7 +19,7 @@ import h5py
 import numpy as np
 from jinja2 import Template
 
-def count_tags_in_attr(k: str, val_str: str, tag_counts: dict):
+def count_tags_in_attr(k: str, val_str: str, tag_counts: dict) -> Any:
     has_bracket_tag = False
     for tag in ["[M]", "[D]", "[E]"]:
         c = val_str.count(tag)
@@ -45,7 +47,7 @@ def compute_state_tensor_provenance_hash(h5_path: Path) -> str:
     try:
         with h5py.File(h5_path, 'r') as f:
             items = []
-            def visitor(name, obj):
+            def visitor(name, obj) -> Any:
                 if isinstance(obj, (h5py.Dataset, h5py.Group)):
                     items.append((name, obj))
             f.visititems(visitor)
@@ -157,7 +159,7 @@ METHOD_PARAGRAPHS = {
 }
 
 class MethodologyTracker:
-    def __init__(self, hdf5_path: str = "landscape.h5"):
+    def __init__(self, hdf5_path: str = "landscape.h5") -> None:
         self.hdf5_path = Path(hdf5_path)
         self.compute_flags = set()
 
@@ -438,5 +440,15 @@ if __name__ == "__main__":
     tracker = MethodologyTracker(h5_path)
     m_tex = tracker.render_methods_tex()
     r_bib = tracker.render_references_bib()
-    print("=== methods.tex ===\n", m_tex)
-    print("=== references.bib ===\n", r_bib)
+    logger.info(f"=== methods.tex ===\n{m_tex}")
+    logger.info(f"=== references.bib ===\n{r_bib}")
+def calculate_artifact_sha256(filepath: str | Path) -> str:
+    """Calculates SHA-256 hash of a computational artifact."""
+    p = Path(filepath)
+    if not p.exists():
+        raise FileNotFoundError(f"Artifact file not found: {filepath}")
+    hasher = hashlib.sha256()
+    with open(p, "rb") as f:
+        while chunk := f.read(65536):
+            hasher.update(chunk)
+    return hasher.hexdigest()
