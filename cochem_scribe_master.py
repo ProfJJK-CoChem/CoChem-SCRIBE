@@ -92,8 +92,7 @@ def compute_state_tensor_provenance_hash(h5_path: Path) -> str:
             f.attrs['tensor_provenance_hash'] = digest
             f.attrs['provenance_tag_audit'] = json.dumps(tag_counts)
     except Exception:
-        pass
-
+        raise NotImplementedError("Implementation pending")
     return digest
 
 
@@ -333,8 +332,7 @@ class MethodologyTracker:
                     flags.add("MACE_OFF24m")
                     break
             except Exception:
-                pass
-
+                raise NotImplementedError("Implementation pending")
         return flags
 
     def render_methods_tex(self, output_path: str = "methods.tex") -> str:

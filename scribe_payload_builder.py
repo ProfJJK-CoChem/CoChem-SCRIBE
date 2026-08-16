@@ -20,6 +20,23 @@ from datetime import datetime
 import h5py
 
 from cochem_base.config_loader import resolve_config_path
+from pydantic import BaseModel, Field
+
+class HardwarePayload(BaseModel):
+    ram_gb: int
+    cpu_cores: int
+    gpu_profile: str
+
+class ScribePayload(BaseModel):
+    product_class: str
+    tier_tag: str
+    tier_category: str
+    max_mace_batch_size: int
+    accuracy_claims: list
+    routing_gates: list
+    hardware: HardwarePayload
+    execution_logs: dict
+    standing_rule_7_violations: list = Field(default_factory=list)
 
 class Colors:
     OKCYAN = '\033[96m'
@@ -494,7 +511,7 @@ class ScribePayloadBuilder:
         accuracy_claims = system_config.get("accuracy_claims", [])
         routing_gates = system_config.get("routing_gates", [])
 
-        payload = {
+        payload_data = {
             "product_class": product_class,
             "tier_tag": tier_tag,
             "tier_category": tier_category,
@@ -509,13 +526,16 @@ class ScribePayloadBuilder:
             "execution_logs": log_data
         }
 
-        violations = validate_standing_rule_7(payload)
-        payload["standing_rule_7_violations"] = violations
+        violations = validate_standing_rule_7(payload_data)
+        payload_data["standing_rule_7_violations"] = violations
+        
+        validated_payload = ScribePayload(**payload_data)
+        
         if violations:
             for v in violations:
                 logging.warning(v)
 
-        return payload
+        return validated_payload.model_dump()
 
     def construct_user_guide_prompt(self) -> str:
         """Compiles the authoritative LLM Prompt for the User Guide."""

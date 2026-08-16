@@ -243,9 +243,22 @@ class ScribeFigureGenerator:
 
     def _parse_qcxms_file(self, res_file) -> Any:
         try:
+            mz_values = []
+            intensities = []
+            with open(res_file, "r") as f:
+                for line in f:
+                    parts = line.strip().split()
+                    if len(parts) >= 2:
+                        try:
+                            mz_values.append(float(parts[0]))
+                            intensities.append(float(parts[1]))
+                        except ValueError:
+                            raise NotImplementedError("Implementation pending")
+            if not mz_values:
+                logging.warning(f"No valid MS data found in {res_file}")
+                return
+
             fig = go.Figure()
-            mz_values = [100, 120, 140, 160, 180]
-            intensities = [100, 80, 60, 40, 20]
             fig.add_trace(go.Bar(x=mz_values, y=intensities, name='Theoretical MS'))
             output_file = self.output_dir / f"{res_file.stem}_ms.html"
             fig.write_html(str(output_file))

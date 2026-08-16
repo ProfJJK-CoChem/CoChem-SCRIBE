@@ -127,13 +127,13 @@ All vibrational and rotational spectra were processed via the Colbert-Miller Sin
 {% if params.rotational_constants %}
 - **Rotational Constants**: {{ params.rotational_constants }}
 {% else %}
-- **Rotational Constants**: A = 10000.00 MHz, B = 5000.00 MHz, C = 2500.00 MHz
+- **Rotational Constants**: N/A
 {% endif %}
 
 {% if params.kinetic_barriers %}
 - **Reaction Kinetic Barrier**: {{ params.kinetic_barriers }}
 {% else %}
-- **Reaction Kinetic Barrier**: $\\Delta E^\\ddagger = 12.4 \\text{ kcal/mol}$
+- **Reaction Kinetic Barrier**: N/A
 {% endif %}
 
 ## 3. Global Minimum Analysis

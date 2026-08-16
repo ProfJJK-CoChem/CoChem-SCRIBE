@@ -57,3 +57,8 @@
 2026-08-10 15:31:26,676 - INFO - SCRIBE inference execution successfully finished.
 2026-08-10 15:31:27,120 - INFO - Offline Jinja2 fallback engine activated.
 2026-08-10 15:31:27,134 - INFO - SCRIBE results and discussion generation successfully finished.
+2026-08-15 00:24:39,796 - INFO - [93m[WARN] GEMINI_API_KEY not configured. Triggering offline Jinja2 fallback.[0m
+2026-08-15 00:24:39,796 - INFO - [93m[WARN] Utilizing offline Jinja2 fallback template renderer for document generation.[0m
+2026-08-15 00:24:39,796 - INFO - Offline Jinja2 fallback engine activated.
+2026-08-15 00:24:39,814 - INFO - [92m[OK] CoChem User Guide successfully generated: CoChem_User_Guide.md[0m
+2026-08-15 00:24:39,814 - INFO - SCRIBE inference execution successfully finished.
