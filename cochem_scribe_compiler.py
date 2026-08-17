@@ -95,10 +95,9 @@ def compile_qcschema_to_tex(qcschema: Dict[str, Any]) -> str:
         tex_lines.append(r"\\begin{itemize}")
         for prop, val in properties.items():
             prop_esc = prop.replace("_", r"\\_")
-            if isinstance(val, (int, float)):
-                tex_lines.append(f"    \\item {prop_esc}: {val} [M]")
-            else:
-                tex_lines.append(f"    \\item {prop_esc}: {val} [D]")
+            # All QCSchema properties are computed, hence derived [D] or estimated [E]. 
+            # We enforce [D] to prevent provenance spoofing.
+            tex_lines.append(f"    \\item {prop_esc}: {val} [D]")
         tex_lines.append(r"\\end{itemize}")
         tex_lines.append("")
 
@@ -128,9 +127,9 @@ class ScribeCompiler:
         tex_lines.append(r"\usepackage{siunitx}")
         tex_lines.append(r"\begin{table}[h!]")
         tex_lines.append(r"\centering")
-        tex_lines.append(r"\begin{tabular}{l S[table-format=-3.4] S[table-format=-3.4] S[table-format=-3.4]}")
+        tex_lines.append(r"\begin{tabular}{l S[table-format=-5.6] S[table-format=-5.6] S[table-format=-5.6]}")
         tex_lines.append(r"\toprule")
-        tex_lines.append(r"Conformer & {Energy (Ha) [D]} & {Enthalpy (Ha) [D]} & {Gibbs Free Energy (Ha) [D]} \\")
+        tex_lines.append(r"Conformer & {Energy (Ha) [D]} & {Enthalpy at 298.15 K (Ha) [D]} & {Gibbs Free Energy at 298.15 K (Ha) [D]} \\")
         tex_lines.append(r"\midrule")
 
         if self.hdf5_path.exists():
@@ -141,7 +140,7 @@ class ScribeCompiler:
                     e = grp.attrs.get('energy', 0.0)
                     h = grp.attrs.get('enthalpy', 0.0)
                     g = grp.attrs.get('gibbs_free_energy', 0.0)
-                    tex_lines.append(f"{key} & {e:.4f} & {h:.4f} & {g:.4f} \\\\")
+                    tex_lines.append(f"{key} & {e:.6f} & {h:.6f} & {g:.6f} \\\\")
 
         tex_lines.append(r"\bottomrule")
         tex_lines.append(r"\end{tabular}")

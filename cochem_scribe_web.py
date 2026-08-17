@@ -37,6 +37,8 @@ if st.button("🚀 Execute Default Pipeline"):
         
         env = os.environ.copy()
         env["COCHEM_TARGET_H5"] = os.path.join(os.getcwd(), "landscape.h5")
+        env["COCHEM_TARGET_SMILES"] = target_smiles
+        env["COCHEM_RUN_MODE"] = run_mode
         
         try:
             cmd = [sys.executable, "cochem_scribe_master.py"]
