@@ -91,8 +91,8 @@ def compute_state_tensor_provenance_hash(h5_path: Path) -> str:
         with h5py.File(h5_path, 'a') as f:
             f.attrs['tensor_provenance_hash'] = digest
             f.attrs['provenance_tag_audit'] = json.dumps(tag_counts)
-    except Exception:
-        raise NotImplementedError("Implementation pending")
+    except Exception as e:
+        logging.error(f"Failed to write provenance to {h5_path}: {e}")
     return digest
 
 
@@ -331,8 +331,8 @@ class MethodologyTracker:
                 if 'MACE' in head and ('energy' in head.lower() or 'forces' in head.lower()):
                     flags.add("MACE_OFF24m")
                     break
-            except Exception:
-                raise NotImplementedError("Implementation pending")
+            except Exception as e:
+                logging.warning(f"Error parsing MACE log {log_file}: {e}")
         return flags
 
     def render_methods_tex(self, output_path: str = "methods.tex") -> str:

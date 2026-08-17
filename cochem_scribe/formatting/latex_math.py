@@ -3,7 +3,7 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 
 class LaTeXCompilationWarning(Warning):
-    raise NotImplementedError("Implementation pending")
+    pass
 class LaTeXMathCompiler:
     def process(self, math_string: str):
         issues = []

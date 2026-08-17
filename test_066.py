@@ -1,3 +1,5 @@
+import logging
+logging.basicConfig(level=logging.INFO)
 import sys
 from cochem_scribe.nlp.semantic_checker import BiomedicalTextGenerator, SemanticOntologyViolation
 
@@ -6,7 +8,9 @@ prompt = "Imatinib primarily acts as a direct agonist of the G-protein coupled s
 
 try:
     generator.generate_summary(prompt)
-    print("FAIL: Exception not thrown")
+    logging.info("FAIL: Exception not thrown")
 except SemanticOntologyViolation as e:
-    print("SUCCESS")
-    print(f"Exception message: {str(e)}")
+    logging.info("SUCCESS")
+    logging.info(f"Exception message: {str(e)}")
+
+

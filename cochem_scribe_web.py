@@ -17,7 +17,7 @@ def kill_zombie_processes() -> None:
             if any(target in name for target in target_procs):
                 proc.terminate()
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-            raise NotImplementedError("Implementation pending")
+            continue
 atexit.register(kill_zombie_processes)
 
 st.title("🔬 CoChem-SCRIBE Control Panel")
@@ -39,7 +39,7 @@ if st.button("🚀 Execute Default Pipeline"):
         env["COCHEM_TARGET_H5"] = os.path.join(os.getcwd(), "landscape.h5")
         
         try:
-            cmd = [sys.executable, "-m", "pytest", str(tests_dir), "-v"]
+            cmd = [sys.executable, "cochem_scribe_master.py"]
             result = subprocess.run(
                 cmd, 
                 capture_output=True, 

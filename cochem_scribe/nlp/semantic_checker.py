@@ -4,7 +4,7 @@ import json
 import re
 
 class SemanticOntologyViolation(Exception):
-    raise NotImplementedError("Implementation pending")
+    pass
 class BiomedicalTextGenerator:
     def __init__(self):
         self.europepmc_endpoint = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
@@ -33,24 +33,14 @@ class BiomedicalTextGenerator:
             hit_count = data.get('hitCount', 0)
             
             if hit_count == 0:
-                val_query = urllib.parse.quote(f'"{entity1}" AND "BCR-ABL"')
-                val_url = f"{self.europepmc_endpoint}?query={val_query}&format=json"
-                val_req = urllib.request.Request(val_url, headers={'User-Agent': 'mailto:cochem@example.com'})
-                val_resp = urllib.request.urlopen(val_req)
-                val_data = json.loads(val_resp.read())
-                
-                verified_pathway = "Unknown pathway"
-                if val_data.get('hitCount', 0) > 0:
-                    verified_pathway = "BCR-ABL kinase pathway"
-                
                 return {
                     "support_count": 0,
                     "contradiction_citation": f"EuropePMC hitCount: 0 for '{query_str}'",
-                    "verified_pathway": verified_pathway
+                    "verified_pathway": "No verified pathway found in literature"
                 }
             return {"support_count": hit_count}
         except Exception as e:
-            return {"support_count": 0, "contradiction_citation": str(e), "verified_pathway": "BCR-ABL kinase pathway"}
+            raise SemanticOntologyViolation(f"EuropePMC API request failed: {e}")
 
     def generate_summary(self, prompt: str) -> str:
         e1, rel, e2 = self._extract_triplet(prompt)

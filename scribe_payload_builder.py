@@ -152,11 +152,11 @@ class ScribePayloadBuilder:
         self.manifest_path = Path("cochem_deployment_manifest.json")
         self.h5_file_path = Path("cochem_state.h5")
         self.crossref_api_url = "https://api.crossref.org/works"
-        self.methodology_file = Path("Methodology.tex")
-        self.bib_file = Path("manuscript.bib")
-        self.tables_file = Path("manuscript_tables.tex")
+        self.methodology_file = artifact_dir / "Methodology.tex"
+        self.bib_file = artifact_dir / "manuscript.bib"
+        self.tables_file = artifact_dir / "manuscript_tables.tex"
         self.template_dir = Path("templates")
-        self.cache_path = Path("crossref_cache.json")
+        self.cache_path = artifact_dir / "crossref_cache.json"
 
     def _load_json_safe(self, filepath: Path) -> dict:
         if not filepath.exists():

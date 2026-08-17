@@ -1,7 +1,7 @@
 import warnings
 
 class CircularASTWarning(Warning):
-    raise NotImplementedError("Implementation pending")
+    pass
 class ASTNode:
     def __init__(self, name, children=None):
         self.name = name

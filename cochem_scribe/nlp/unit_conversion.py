@@ -1,5 +1,5 @@
 class DimensionalAnalysisError(Exception):
-    raise NotImplementedError("Implementation pending")
+    pass
 class UnitConversionEngine:
     def __init__(self):
         self.hartree_to_kcal_mol = 627.509

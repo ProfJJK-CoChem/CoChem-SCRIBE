@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 
 class BrokenImageReferenceError(Exception):
-    raise NotImplementedError("Implementation pending")
+    pass
 def preflight_latex_ast(latex_content: str, search_dir: str | Path) -> str:
     search_dir = Path(search_dir)
     pattern = re.compile(r'\\includegraphics(?:\[.*?\])?\{(.*?)\}')

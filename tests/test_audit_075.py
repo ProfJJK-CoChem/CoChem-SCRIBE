@@ -20,8 +20,13 @@ class TestAudit075BrokenImage(unittest.TestCase):
         shutil.rmtree(self.test_dir)
 
     def test_phantom_svg_with_fallback(self):
-        # Create a fallback image
-        (self.test_dir / 'figures' / 'optimized_geometry.png').touch()
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        ax.plot([0, 1], [0, 1])
+        fig.savefig(self.test_dir / 'figures' / 'optimized_geometry.png')
+        plt.close(fig)
         
         latex_content = r'Some text \\includegraphics{figures/optimized_geometry.svg} more text.'
         try:

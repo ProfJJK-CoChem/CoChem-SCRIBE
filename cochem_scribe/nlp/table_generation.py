@@ -1,6 +1,6 @@
 class UnphysicalTableDataError(Exception):
     """Exception raised when physically impossible data is generated for a table."""
-    raise NotImplementedError("Implementation pending")
+    pass
 class TableGenerator:
     """Generates and validates table rows for physical properties."""
     def __init__(self):

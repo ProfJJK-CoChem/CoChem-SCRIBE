@@ -44,8 +44,8 @@ logging.basicConfig(filename=str(artifact_dir / 'cochem_scribe_figures.log'), le
 class ScribeFigureGenerator:
     def __init__(self) -> None:
         self.h5_file_path = Path("cochem_state.h5")
-        self.output_dir = Path("generated_figures")
-        self.output_dir.mkdir(exist_ok=True)
+        self.output_dir = artifact_dir / "generated_figures"
+        self.output_dir.mkdir(parents=True, exist_ok=True)
         self.figures_generated = 0
 
     def _generate_topos_artifacts(self) -> Any:
@@ -253,7 +253,7 @@ class ScribeFigureGenerator:
                             mz_values.append(float(parts[0]))
                             intensities.append(float(parts[1]))
                         except ValueError:
-                            raise NotImplementedError("Implementation pending")
+                            continue
             if not mz_values:
                 logging.warning(f"No valid MS data found in {res_file}")
                 return

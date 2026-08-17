@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 import re
 
 class LaTeXProofWarning(Warning):
-    raise NotImplementedError("Implementation pending")
+    pass
 class ScribeCompiler:
     def __init__(self, use_arxiv_search=True):
         self.use_arxiv_search = use_arxiv_search

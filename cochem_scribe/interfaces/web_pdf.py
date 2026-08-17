@@ -1,7 +1,7 @@
 import warnings
 
 class CSSBleedWarning(Warning):
-    raise NotImplementedError("Implementation pending")
+    pass
 def render_preview(canvas_html: str, canvas_width: int, parent_width: int = 1000) -> str:
     """
     Renders a WebGL canvas in the previewer. Intercepts DOM insertion to prevent CSS bleeding.

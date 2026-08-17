@@ -2,7 +2,7 @@ import warnings
 import re
 
 class CircularReferenceWarning(Warning):
-    raise NotImplementedError("Implementation pending")
+    pass
 class ReferenceNode:
     def __init__(self, ref_id, text):
         self.ref_id = ref_id

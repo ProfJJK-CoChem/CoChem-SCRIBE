@@ -3,7 +3,7 @@ import warnings
 
 class DataHallucinationWarning(Warning):
     """Warning raised when missing experimental data is detected and imputation is blocked."""
-    raise NotImplementedError("Implementation pending")
+    pass
 def generate_reporting_table(df, interpolate=False):
     """
     Generate a standardized reporting table.

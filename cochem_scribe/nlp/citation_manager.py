@@ -3,7 +3,7 @@ import requests
 import json
 
 class MissingBibTeXKeyError(Exception):
-    raise NotImplementedError("Implementation pending")
+    pass
 class CitationManager:
     def __init__(self, bib_db):
         self.bib_db = bib_db
@@ -23,7 +23,7 @@ class CitationManager:
                     bibtex = f"@article{{{cite_key},\n  title={{{title}}},\n  doi={{{doi}}}\n}}"
                     return bibtex
         except Exception as e:
-            print(f"Failed to fetch from CrossRef: {e}")
+            logging.warning(f"Failed to fetch from CrossRef: {e}")
         return None
     def verify_and_resolve(self, tex_content):
         citations = re.findall(r'\\cite\{([^}]+)\}', tex_content)
@@ -64,3 +64,4 @@ class CitationManager:
                 return True, "PDF compiled successfully after resolving."
             except MissingBibTeXKeyError:
                 return False, "Failed to resolve all missing keys."
+

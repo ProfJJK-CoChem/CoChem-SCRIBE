@@ -31,8 +31,9 @@ class IUPACGenerator:
             if response.status_code == 200:
                 data = response.json()
                 return data.get('PropertyTable', {}).get('Properties', [{}])[0].get('IUPACName', '[MISSING DATA]')
-        except Exception:
-            raise NotImplementedError("Implementation pending")
+        except Exception as e:
+            import logging
+            logging.error(f"Error querying pubchem: {e}")
         return "[MISSING DATA]"
 
     def validate_and_inject(self, smiles: str, generated_name: str, template: dict) -> dict:
