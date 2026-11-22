@@ -1,0 +1,306 @@
+{
+  "schema_version": "cochem.scribe.geom-figure-receipt/1",
+  "renderer": "render_geom_comparison",
+  "molecule": "H2O",
+  "symmetry": "C2v",
+  "source_comparison_json": "D:\\__CoChem\\GitHub-Repo\\CoChem-GEOM\\benchmarks\\h2o_t_geom_01\\h2o_t_geom_01_comparison.json",
+  "source_comparison_sha256": "f8b91ab0877d920dcdf812cde14891f411a29f9a8f28ccd4819cbe1e2ff6fda6",
+  "upstream_provenance": {
+    "orca_ccsd_output_sha256": "0ed9f5b81a11f5b16de807e5b9f2b597ddaf5f77f800bdba4223b9f934374bf2",
+    "pyscf_ccsd_output_sha256": "f10846f2f2d871eb19d2c3a0967b98b49ab8ec370c6eee74c5043383ad423ac3",
+    "experimental_source_doi": "10.1021/jp511432m"
+  },
+  "r_e_se_status": "PENDING",
+  "columns": [
+    {
+      "key": "r_e_ccsd_cc_pvtz_orca",
+      "label": "r_e\nORCA CCSD\ncc-pVTZ",
+      "status": "VERIFIED",
+      "bond_angstrom": 0.9571203332381985,
+      "bond_uncertainty_angstrom": null,
+      "angle_deg": 103.89347350732784,
+      "angle_uncertainty_deg": null,
+      "note": null
+    },
+    {
+      "key": "r_e_ccsd_cc_pvdz_pyscf",
+      "label": "r_e\nPySCF CCSD\ncc-pVDZ",
+      "status": "VERIFIED",
+      "bond_angstrom": 0.9643520607230514,
+      "bond_uncertainty_angstrom": null,
+      "angle_deg": 102.2097420049931,
+      "angle_uncertainty_deg": null,
+      "note": null
+    },
+    {
+      "key": "r_s_kraitchman",
+      "label": "r_s\nKraitchman\n(\u00b1\u03c3_Costain)",
+      "status": "VERIFIED",
+      "bond_angstrom": 0.9655924392492925,
+      "bond_uncertainty_angstrom": 0.014362905000733709,
+      "angle_deg": 103.45035370004554,
+      "angle_uncertainty_deg": 2.152490842271258,
+      "note": null
+    },
+    {
+      "key": "r_0_weighted_fit",
+      "label": "r_0\nWeighted Fit\n(\u00b1\u03c3_scaled)",
+      "status": "VERIFIED",
+      "bond_angstrom": 0.9574701680195489,
+      "bond_uncertainty_angstrom": 0.0011910091375419516,
+      "angle_deg": 104.98392675226545,
+      "angle_uncertainty_deg": 0.16425686018042907,
+      "note": null
+    },
+    {
+      "key": "r_e_se",
+      "label": "r_e^SE\nSemi-Exp.\n(requires \u0394B_vib)",
+      "status": "PENDING",
+      "bond_angstrom": null,
+      "bond_uncertainty_angstrom": null,
+      "angle_deg": null,
+      "angle_uncertainty_deg": null,
+      "note": "Semi-experimental equilibrium structure r_e^SE requires verified isotope-specific anharmonic vibrational corrections Delta_B_vib (B_e^SE = B_0^exp - Delta_B_vib); never equated with B_0 or r_0."
+    }
+  ],
+  "outputs": {
+    "png": {
+      "path": "D:\\__CoChem\\GitHub-Repo\\CoChem-SCRIBE\\benchmarks\\verified_figures\\h2o_geom_comparison.png",
+      "bytes": 340842,
+      "sha256": "629ed19a17acaee78c0606221e40dad1b644d1fb55069485d11edbdd192cc26c"
+    },
+    "pdf": {
+      "path": "D:\\__CoChem\\GitHub-Repo\\CoChem-SCRIBE\\benchmarks\\verified_figures\\h2o_geom_comparison.pdf",
+      "bytes": 40252,
+      "sha256": "8729c56860f701c12560ea7023a080d556bf7a81bb33ec13cdca0a0b58ccf351"
+    }
+  },
+  "verified_figures": {
+    "h2o_geom_comparison": {
+      "schema_version": "cochem.scribe.geom-figure-receipt/1",
+      "source_path": "D:\\__CoChem\\GitHub-Repo\\CoChem-GEOM\\benchmarks\\h2o_t_geom_01\\h2o_t_geom_01_comparison.json",
+      "source_sha256": "f8b91ab0877d920dcdf812cde14891f411a29f9a8f28ccd4819cbe1e2ff6fda6",
+      "r_e_se_status": "PENDING",
+      "outputs": {
+        "png": {
+          "path": "D:\\__CoChem\\GitHub-Repo\\CoChem-SCRIBE\\benchmarks\\verified_figures\\h2o_geom_comparison.png",
+          "bytes": 340842,
+          "sha256": "629ed19a17acaee78c0606221e40dad1b644d1fb55069485d11edbdd192cc26c"
+        },
+        "pdf": {
+          "path": "D:\\__CoChem\\GitHub-Repo\\CoChem-SCRIBE\\benchmarks\\verified_figures\\h2o_geom_comparison.pdf",
+          "bytes": 40252,
+          "sha256": "8729c56860f701c12560ea7023a080d556bf7a81bb33ec13cdca0a0b58ccf351"
+        }
+      }
+    },
+    "chem312_team1_formate_rxn_profile": {
+      "schema_version": "cochem.scribe.kinetic-figure-receipt/1",
+      "renderer": "render_kinetic_rxn_profile",
+      "source_csv": "D:\\__CoChem\\GitHub-Repo\\CoChem-KINETIC\\benchmarks\\chem312_t_kin_01\\case_a_team1_formate\\stationary_table.csv",
+      "source_csv_sha256": "9036dbfb1d0a13380808fa5cf1533cfaea47de83b54a954d8efe55d457264989",
+      "energy_column": "delta_g_qrrho_kcal",
+      "strict_mode": true,
+      "verified_states": [
+        "R",
+        "TS1",
+        "Int_tet",
+        "TS2",
+        "P"
+      ],
+      "pending_states": [],
+      "stationary_points": [
+        {
+          "state": "R",
+          "verified": true,
+          "status": "VERIFIED",
+          "n_imag": 0,
+          "imag_freq_cm1": 0.0,
+          "e_elec_ha": -1046.1912066606,
+          "zpe_ha": 0.1633119157,
+          "delta_e_kcal": 0.0,
+          "delta_h_kcal": 0.0,
+          "delta_g_kcal": 0.0,
+          "row_sha256": null,
+          "reasons": []
+        },
+        {
+          "state": "TS1",
+          "verified": true,
+          "status": "VERIFIED",
+          "n_imag": 1,
+          "imag_freq_cm1": -309.55,
+          "e_elec_ha": -1046.1646956875,
+          "zpe_ha": 0.1636074027,
+          "delta_e_kcal": 16.6359,
+          "delta_h_kcal": 15.7326,
+          "delta_g_kcal": 18.1319,
+          "row_sha256": null,
+          "reasons": []
+        },
+        {
+          "state": "Int_tet",
+          "verified": true,
+          "status": "VERIFIED",
+          "n_imag": 0,
+          "imag_freq_cm1": 0.0,
+          "e_elec_ha": -1046.1816099784,
+          "zpe_ha": 0.1653525509,
+          "delta_e_kcal": 6.022,
+          "delta_h_kcal": 6.8071,
+          "delta_g_kcal": 7.946,
+          "row_sha256": null,
+          "reasons": []
+        },
+        {
+          "state": "TS2",
+          "verified": true,
+          "status": "VERIFIED",
+          "n_imag": 1,
+          "imag_freq_cm1": -332.9,
+          "e_elec_ha": -1046.1623866568,
+          "zpe_ha": 0.1615578497,
+          "delta_e_kcal": 18.0848,
+          "delta_h_kcal": 15.9041,
+          "delta_g_kcal": 18.3319,
+          "row_sha256": null,
+          "reasons": []
+        },
+        {
+          "state": "P",
+          "verified": true,
+          "status": "VERIFIED",
+          "n_imag": 0,
+          "imag_freq_cm1": 0.0,
+          "e_elec_ha": -1046.1844287591,
+          "zpe_ha": 0.1612066696,
+          "delta_e_kcal": 4.2532,
+          "delta_h_kcal": 3.7746,
+          "delta_g_kcal": 1.7504,
+          "row_sha256": null,
+          "reasons": []
+        }
+      ],
+      "outputs": {
+        "png": {
+          "path": "D:\\__CoChem\\GitHub-Repo\\CoChem-SCRIBE\\benchmarks\\verified_figures\\chem312_team1_formate_rxn_profile.png",
+          "bytes": 245597,
+          "sha256": "a8f60c5d6cd47f6651a75a5628fb1468c1250fb699a4959657584a957ba539c8"
+        },
+        "pdf": {
+          "path": "D:\\__CoChem\\GitHub-Repo\\CoChem-SCRIBE\\benchmarks\\verified_figures\\chem312_team1_formate_rxn_profile.pdf",
+          "bytes": 38391,
+          "sha256": "d833be963075a22f5e52215361e88002e9696fa8458f210720386857eaf13432"
+        }
+      }
+    },
+    "chem312_team4_carbonate_rxn_profile": {
+      "schema_version": "cochem.scribe.kinetic-figure-receipt/1",
+      "renderer": "render_kinetic_rxn_profile",
+      "source_csv": "D:\\__CoChem\\GitHub-Repo\\CoChem-KINETIC\\benchmarks\\chem312_t_kin_01\\case_b_team4_ec_cyclization\\stationary_table.csv",
+      "source_csv_sha256": "068763583818bd1f80bad246c6966835bd331aea6c14192a2645446e49693438",
+      "energy_column": "delta_g_qrrho_kcal",
+      "strict_mode": true,
+      "verified_states": [
+        "R",
+        "TS1",
+        "Int_tet",
+        "TS2",
+        "P"
+      ],
+      "pending_states": [],
+      "stationary_points": [
+        {
+          "state": "R",
+          "verified": true,
+          "status": "VERIFIED",
+          "n_imag": 0,
+          "imag_freq_cm1": 0.0,
+          "e_elec_ha": -457.7123149741,
+          "zpe_ha": 0.1136388902,
+          "delta_e_kcal": 0.0,
+          "delta_h_kcal": 0.0,
+          "delta_g_kcal": 0.0,
+          "row_sha256": null,
+          "reasons": []
+        },
+        {
+          "state": "TS1",
+          "verified": true,
+          "status": "VERIFIED",
+          "n_imag": 1,
+          "imag_freq_cm1": -63.13,
+          "e_elec_ha": -457.7113666476,
+          "zpe_ha": 0.1133726558,
+          "delta_e_kcal": 0.5951,
+          "delta_h_kcal": -0.0288,
+          "delta_g_kcal": 0.9262,
+          "row_sha256": null,
+          "reasons": []
+        },
+        {
+          "state": "Int_tet",
+          "verified": true,
+          "status": "VERIFIED",
+          "n_imag": 0,
+          "imag_freq_cm1": 0.0,
+          "e_elec_ha": -457.7337023584,
+          "zpe_ha": 0.1152118664,
+          "delta_e_kcal": -13.4208,
+          "delta_h_kcal": -12.8806,
+          "delta_g_kcal": -11.7458,
+          "row_sha256": null,
+          "reasons": []
+        },
+        {
+          "state": "TS2",
+          "verified": true,
+          "status": "VERIFIED",
+          "n_imag": 1,
+          "imag_freq_cm1": -183.59,
+          "e_elec_ha": -457.711441846,
+          "zpe_ha": 0.1128902802,
+          "delta_e_kcal": 0.5479,
+          "delta_h_kcal": -0.4329,
+          "delta_g_kcal": 0.709,
+          "row_sha256": null,
+          "reasons": []
+        },
+        {
+          "state": "P",
+          "verified": true,
+          "status": "VERIFIED",
+          "n_imag": 0,
+          "imag_freq_cm1": 0.0,
+          "e_elec_ha": -457.7131785666,
+          "zpe_ha": 0.1127103532,
+          "delta_e_kcal": -0.5419,
+          "delta_h_kcal": -1.1472,
+          "delta_g_kcal": -1.176,
+          "row_sha256": null,
+          "reasons": []
+        }
+      ],
+      "outputs": {
+        "png": {
+          "path": "D:\\__CoChem\\GitHub-Repo\\CoChem-SCRIBE\\benchmarks\\verified_figures\\chem312_team4_carbonate_rxn_profile.png",
+          "bytes": 237938,
+          "sha256": "ddb1d2bedc884b6ec2e1182d7a30b77319b6d2c7f1a6d4473abc0936b2ccf0db"
+        },
+        "pdf": {
+          "path": "D:\\__CoChem\\GitHub-Repo\\CoChem-SCRIBE\\benchmarks\\verified_figures\\chem312_team4_carbonate_rxn_profile.pdf",
+          "bytes": 37884,
+          "sha256": "310927dc62a90d9c365e0a3fe335f2d8509fc2f8361225cbeb4a76eda3c4dbe0"
+        }
+      }
+    }
+  },
+  "files_sha256": {
+    "chem312_team1_formate_rxn_profile.pdf": "d833be963075a22f5e52215361e88002e9696fa8458f210720386857eaf13432",
+    "chem312_team1_formate_rxn_profile.png": "a8f60c5d6cd47f6651a75a5628fb1468c1250fb699a4959657584a957ba539c8",
+    "chem312_team4_carbonate_rxn_profile.pdf": "310927dc62a90d9c365e0a3fe335f2d8509fc2f8361225cbeb4a76eda3c4dbe0",
+    "chem312_team4_carbonate_rxn_profile.png": "ddb1d2bedc884b6ec2e1182d7a30b77319b6d2c7f1a6d4473abc0936b2ccf0db",
+    "h2o_geom_comparison.pdf": "8729c56860f701c12560ea7023a080d556bf7a81bb33ec13cdca0a0b58ccf351",
+    "h2o_geom_comparison.png": "629ed19a17acaee78c0606221e40dad1b644d1fb55069485d11edbdd192cc26c"
+  }
+}

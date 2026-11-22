@@ -19,7 +19,11 @@ from pathlib import Path
 from datetime import datetime
 import h5py
 
-from cochem_base.config_loader import resolve_config_path
+try:
+    from cochem_base.config_loader import resolve_config_path
+except ImportError:
+    def resolve_config_path(filename: str = "cochem_system_config.json") -> Path:
+        return Path(filename)
 from pydantic import BaseModel, Field
 
 class HardwarePayload(BaseModel):

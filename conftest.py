@@ -2,12 +2,14 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent
+SRC_ROOT = REPO_ROOT / "src"
 ECOSYSTEM_ROOT = REPO_ROOT.parent
 
 paths_to_add = [
+    str(SRC_ROOT),
     str(REPO_ROOT),
+    str(ECOSYSTEM_ROOT / "CoChem-BASE" / "src"),
     str(ECOSYSTEM_ROOT / "CoChem-BASE"),
-    str(ECOSYSTEM_ROOT / "CoChem-NODE"),
     str(ECOSYSTEM_ROOT),
 ]
 

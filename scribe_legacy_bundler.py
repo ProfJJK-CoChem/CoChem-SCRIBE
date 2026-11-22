@@ -13,7 +13,10 @@ import hashlib
 import logging
 logger = logging.getLogger(__name__)
 from pathlib import Path
-import zstandard as zstd
+try:
+    import zstandard as zstd
+except ImportError:
+    zstd = None  # type: ignore[assignment]
 import numpy as np
 
 def calculate_rotational_constants(symbols=None, coords=None) -> Any:
@@ -81,6 +84,10 @@ class LegacyVerificationBundler:
         """
         Resolves SCRIBE-20: Wraps Pickett legacy files with Zstandard compression (.lin.zst, .cat.zst).
         """
+        if zstd is None:
+            raise ImportError(
+                "zstandard is required for .zst legacy compression; install 'cochem-scribe[zstd]'."
+            )
         zst_path = file_path.with_name(f"{file_path.name}.zst")
         cctx = zstd.ZstdCompressor(level=3)
         with open(file_path, 'rb') as f_in:
