@@ -30,6 +30,22 @@ GEOM_COMPARISON_JSON = (
     / "h2o_t_geom_01"
     / "h2o_t_geom_01_comparison.json"
 )
+KINETIC_CASE_A_CSV = (
+    REPO_ROOT.parent
+    / "CoChem-KINETIC"
+    / "benchmarks"
+    / "chem312_t_kin_01"
+    / "case_a_team1_formate"
+    / "stationary_table.csv"
+)
+KINETIC_CASE_B_CSV = (
+    REPO_ROOT.parent
+    / "CoChem-KINETIC"
+    / "benchmarks"
+    / "chem312_t_kin_01"
+    / "case_b_team4_ec_cyclization"
+    / "stationary_table.csv"
+)
 CHECKED_IN_VERIFIED_DIR = REPO_ROOT / "benchmarks" / "verified_figures"
 
 
@@ -300,3 +316,68 @@ def test_cochem_modules_entry_point_and_scribe_provider_dispatch(tmp_path: Path)
     )
     assert geom_res["r_e_se_status"] == "PENDING"
     assert Path(geom_res["outputs"]["png"]["path"]).is_file()
+
+
+def test_live_render_chem312_verified_kinetic_profiles(tmp_path: Path) -> None:
+    """Live zero-mock render of BOTH V-A6 verified CoChem-KINETIC CHEM 312 CSVs + manifest check."""
+    assert KINETIC_CASE_A_CSV.is_file(), f"Missing verified Case A CSV: {KINETIC_CASE_A_CSV}"
+    assert KINETIC_CASE_B_CSV.is_file(), f"Missing verified Case B CSV: {KINETIC_CASE_B_CSV}"
+
+    cases = [
+        (
+            "chem312_team1_formate_rxn_profile",
+            KINETIC_CASE_A_CSV,
+            "CHEM 312 Case A (Team 1, C5H10O6S, Q=0): DF-ωB97X-D3/def2-TZVPP + C-PCM(MeCN)",
+            18.1319,
+            18.3319,
+        ),
+        (
+            "chem312_team4_carbonate_rxn_profile",
+            KINETIC_CASE_B_CSV,
+            "CHEM 312 Case B (Team 4, C4H7O4-, Q=-1): DF-ωB97X-D3/def2-TZVPP + C-PCM(MeCN)",
+            0.9262,
+            0.7090,
+        ),
+    ]
+
+    manifest = json.loads((CHECKED_IN_VERIFIED_DIR / "manifest_sha256.json").read_text(encoding="utf-8"))
+
+    for stem, csv_path, title, expected_ts1_dg, expected_ts2_dg in cases:
+        out_png = tmp_path / f"{stem}.png"
+        out_pdf = tmp_path / f"{stem}.pdf"
+        out_manifest = tmp_path / f"{stem}.json"
+
+        receipt = render_kinetic_rxn_profile(
+            csv_path,
+            out_png,
+            out_pdf,
+            strict=True,
+            title=title,
+            manifest_path=out_manifest,
+        )
+
+        assert out_png.is_file() and out_png.stat().st_size > 10_000
+        assert out_pdf.is_file() and out_pdf.stat().st_size > 5_000
+        assert out_png.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+        assert out_pdf.read_bytes()[:5] == b"%PDF-"
+        assert receipt["verified_states"] == ["R", "TS1", "Int_tet", "TS2", "P"]
+        assert receipt["pending_states"] == []
+        assert receipt["source_csv_sha256"] == sha256_file(csv_path)
+
+        by_state = {pt["state"]: pt for pt in receipt["stationary_points"]}
+        assert by_state["R"]["n_imag"] == 0
+        assert by_state["TS1"]["n_imag"] == 1
+        assert by_state["Int_tet"]["n_imag"] == 0
+        assert by_state["TS2"]["n_imag"] == 1
+        assert by_state["P"]["n_imag"] == 0
+        assert by_state["TS1"]["delta_g_kcal"] == pytest.approx(expected_ts1_dg, abs=1e-4)
+        assert by_state["TS2"]["delta_g_kcal"] == pytest.approx(expected_ts2_dg, abs=1e-4)
+
+        # Verify checked-in benchmark artifacts & unified manifest hashes match disk
+        checked_png = CHECKED_IN_VERIFIED_DIR / f"{stem}.png"
+        checked_pdf = CHECKED_IN_VERIFIED_DIR / f"{stem}.pdf"
+        assert checked_png.is_file() and checked_pdf.is_file()
+        assert manifest["files_sha256"][checked_png.name] == sha256_file(checked_png)
+        assert manifest["files_sha256"][checked_pdf.name] == sha256_file(checked_pdf)
+        assert manifest["verified_figures"][stem]["source_csv_sha256"] == sha256_file(csv_path)
+
