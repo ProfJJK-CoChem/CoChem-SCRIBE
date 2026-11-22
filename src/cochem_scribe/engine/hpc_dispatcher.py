@@ -29,13 +29,13 @@ def render_pes_figure(data_matrix: Optional[List[List[float]]] = None, title: st
     import numpy as np
 
     if data_matrix is None or len(data_matrix) == 0:
-        # Generate standard canonical Morse-type grid if no explicit data passed
-        x = np.linspace(0.8, 3.0, 50)
-        y = np.linspace(0.8, 3.0, 50)
-        X, Y = np.meshgrid(x, y)
-        Z = 5.0 * (1.0 - np.exp(-1.5 * (X - 1.0)))**2 + 5.0 * (1.0 - np.exp(-1.5 * (Y - 1.0)))**2
-    else:
-        Z = np.array(data_matrix, dtype=float)
+        raise ValueError(
+            "render_pes_figure requires verified non-empty 2D PES data_matrix; "
+            "synthetic surface fabrication is prohibited."
+        )
+    Z = np.array(data_matrix, dtype=float)
+    if Z.ndim != 2 or Z.size == 0 or not np.all(np.isfinite(Z)):
+        raise ValueError("data_matrix must be a finite non-empty 2D array.")
 
     fig, ax = plt.subplots(figsize=(6, 5))
     contour = ax.contourf(Z, levels=20, cmap="viridis")

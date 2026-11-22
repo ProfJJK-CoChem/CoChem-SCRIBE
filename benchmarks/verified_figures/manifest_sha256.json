@@ -1,0 +1,78 @@
+{
+  "schema_version": "cochem.scribe.geom-figure-receipt/1",
+  "renderer": "render_geom_comparison",
+  "molecule": "H2O",
+  "symmetry": "C2v",
+  "source_comparison_json": "D:\\__CoChem\\GitHub-Repo\\CoChem-GEOM\\benchmarks\\h2o_t_geom_01\\h2o_t_geom_01_comparison.json",
+  "source_comparison_sha256": "f8b91ab0877d920dcdf812cde14891f411a29f9a8f28ccd4819cbe1e2ff6fda6",
+  "upstream_provenance": {
+    "orca_ccsd_output_sha256": "0ed9f5b81a11f5b16de807e5b9f2b597ddaf5f77f800bdba4223b9f934374bf2",
+    "pyscf_ccsd_output_sha256": "f10846f2f2d871eb19d2c3a0967b98b49ab8ec370c6eee74c5043383ad423ac3",
+    "experimental_source_doi": "10.1021/jp511432m"
+  },
+  "r_e_se_status": "PENDING",
+  "columns": [
+    {
+      "key": "r_e_ccsd_cc_pvtz_orca",
+      "label": "r_e\nORCA CCSD\ncc-pVTZ",
+      "status": "VERIFIED",
+      "bond_angstrom": 0.9571203332381985,
+      "bond_uncertainty_angstrom": null,
+      "angle_deg": 103.89347350732784,
+      "angle_uncertainty_deg": null,
+      "note": null
+    },
+    {
+      "key": "r_e_ccsd_cc_pvdz_pyscf",
+      "label": "r_e\nPySCF CCSD\ncc-pVDZ",
+      "status": "VERIFIED",
+      "bond_angstrom": 0.9643520607230514,
+      "bond_uncertainty_angstrom": null,
+      "angle_deg": 102.2097420049931,
+      "angle_uncertainty_deg": null,
+      "note": null
+    },
+    {
+      "key": "r_s_kraitchman",
+      "label": "r_s\nKraitchman\n(\u00b1\u03c3_Costain)",
+      "status": "VERIFIED",
+      "bond_angstrom": 0.9655924392492925,
+      "bond_uncertainty_angstrom": 0.014362905000733709,
+      "angle_deg": 103.45035370004554,
+      "angle_uncertainty_deg": 2.152490842271258,
+      "note": null
+    },
+    {
+      "key": "r_0_weighted_fit",
+      "label": "r_0\nWeighted Fit\n(\u00b1\u03c3_scaled)",
+      "status": "VERIFIED",
+      "bond_angstrom": 0.9574701680195489,
+      "bond_uncertainty_angstrom": 0.0011910091375419516,
+      "angle_deg": 104.98392675226545,
+      "angle_uncertainty_deg": 0.16425686018042907,
+      "note": null
+    },
+    {
+      "key": "r_e_se",
+      "label": "r_e^SE\nSemi-Exp.\n(requires \u0394B_vib)",
+      "status": "PENDING",
+      "bond_angstrom": null,
+      "bond_uncertainty_angstrom": null,
+      "angle_deg": null,
+      "angle_uncertainty_deg": null,
+      "note": "Semi-experimental equilibrium structure r_e^SE requires verified isotope-specific anharmonic vibrational corrections Delta_B_vib (B_e^SE = B_0^exp - Delta_B_vib); never equated with B_0 or r_0."
+    }
+  ],
+  "outputs": {
+    "png": {
+      "path": "D:\\__CoChem\\GitHub-Repo\\CoChem-SCRIBE\\benchmarks\\verified_figures\\h2o_geom_comparison.png",
+      "bytes": 340842,
+      "sha256": "629ed19a17acaee78c0606221e40dad1b644d1fb55069485d11edbdd192cc26c"
+    },
+    "pdf": {
+      "path": "D:\\__CoChem\\GitHub-Repo\\CoChem-SCRIBE\\benchmarks\\verified_figures\\h2o_geom_comparison.pdf",
+      "bytes": 40252,
+      "sha256": "8729c56860f701c12560ea7023a080d556bf7a81bb33ec13cdca0a0b58ccf351"
+    }
+  }
+}

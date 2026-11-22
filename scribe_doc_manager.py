@@ -15,13 +15,20 @@ logger = logging.getLogger(__name__)
 import asyncio
 import tarfile
 import h5py
-import zstandard as zstd
+try:
+    import zstandard as zstd
+except ImportError:
+    zstd = None  # type: ignore[assignment]
 from datetime import datetime
 from pathlib import Path
 import threading
 import time
 
-from cochem_base.config_loader import resolve_config_path
+try:
+    from cochem_base.config_loader import resolve_config_path
+except ImportError:
+    def resolve_config_path(filename: str = "cochem_system_config.json") -> Path:
+        return Path(filename)
 
 class Colors:
     OKCYAN = '\033[96m'
@@ -121,26 +128,26 @@ class ScribeDocumentManager:
         Resolves SCRIBE-04: Iterates over HDF5 dataset in slices dataset[i:i+chunk_size]
         and streams slices into Zstandard compressor.
         """
-        try:
-            cctx = zstd.ZstdCompressor(level=3)
-            with open(output_path, 'wb') as f_out:
-                with cctx.stream_writer(f_out) as compressor:
-                    total_elements = dataset.shape[0] if len(dataset.shape) > 0 else 1
-                    slice_size = 10000
-                    
-                    if len(dataset.shape) == 0:
-                        scalar_data = dataset[()]
-                        compressor.write(bytes(str(scalar_data), 'utf-8'))
-                    else:
-                        for start_idx in range(0, total_elements, slice_size):
-                            end_idx = min(start_idx + slice_size, total_elements)
-                            chunk_slice = dataset[start_idx:end_idx]
-                            compressor.write(chunk_slice.tobytes())
+        if zstd is None:
+            raise ImportError(
+                "zstandard is required for chunked zstd compression; install 'cochem-scribe[zstd]'."
+            )
+        cctx = zstd.ZstdCompressor(level=3)
+        with open(output_path, 'wb') as f_out:
+            with cctx.stream_writer(f_out) as compressor:
+                total_elements = dataset.shape[0] if len(dataset.shape) > 0 else 1
+                slice_size = 10000
 
-            logging.info(f"Chunk-stream compressed dataset {dataset.name} to {output_path.name}")
-            
-        except Exception as e:
-            logging.error(f"Error compressing dataset chunk: {e}")
+                if len(dataset.shape) == 0:
+                    scalar_data = dataset[()]
+                    compressor.write(bytes(str(scalar_data), 'utf-8'))
+                else:
+                    for start_idx in range(0, total_elements, slice_size):
+                        end_idx = min(start_idx + slice_size, total_elements)
+                        chunk_slice = dataset[start_idx:end_idx]
+                        compressor.write(chunk_slice.tobytes())
+
+        logging.info(f"Chunk-stream compressed dataset {dataset.name} to {output_path.name}")
 
     def harvest_artifacts(self) -> int:
         """

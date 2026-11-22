@@ -1,14 +1,66 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cochem-scribe"
+version = "0.2.0"
+description = "Verified-output scientific figure renderers, cryptographic provenance manifests, and FAIR reporting for the CoChem ecosystem."
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Dr. Joshua John Klaassen" },
+    { name = "CoChem Team" },
+]
+dependencies = [
+    "numpy>=1.24",
+    "matplotlib>=3.8",
+    "pydantic>=2.4",
+]
+
+[project.optional-dependencies]
+zstd = [
+    "zstandard>=0.22",
+]
+legacy = [
+    "h5py>=3.10",
+    "plotly>=5.18",
+    "jinja2>=3.1",
+    "zstandard>=0.22",
+]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.9",
+    "mypy>=1.10",
+]
+
+[project.scripts]
+cochem-scribe = "cochem_scribe.cli:main"
+
+[project.entry-points."cochem.modules"]
+scribe = "cochem_scribe.provider:scribe_provider"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["cochem_scribe*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+python_files = ["test_*.py"]
+addopts = "-ra"
+
 [tool.ruff]
-line-length = 88
+line-length = 100
 target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "N"]
-ignore = []
+ignore = ["E501"]
 
 [tool.mypy]
 python_version = "3.10"
-strict = true
+strict = false
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = true

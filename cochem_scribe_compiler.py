@@ -5,7 +5,11 @@ import logging
 import hashlib
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-from cochem_base.config_loader import resolve_config_path
+try:
+    from cochem_base.config_loader import resolve_config_path
+except ImportError:
+    def resolve_config_path(filename: str = "cochem_system_config.json") -> Path:
+        return Path(filename)
 
 logger = logging.getLogger(__name__)
 
