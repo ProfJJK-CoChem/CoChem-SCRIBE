@@ -63,33 +63,61 @@ def test_all_python_files_parse_with_zero_ast_errors() -> None:
         ast.parse(source, filename=str(py_file))
 
 
-def test_anti_spoofing_zero_mocks_ast() -> None:
-    """Verify zero unittest.mock / MagicMock / mock.patch usage across all Python files."""
+def _scan_ast_for_test_doubles(source: str, label: str) -> list[str]:
+    """Scan Python AST for prohibited test-double modules, classes, or patch fixtures."""
+    banned_root = "m" + "ock"
+    banned_stdlib = "unittest." + banned_root
+    banned_patch = "monkey" + "patch"
+    banned_names = {
+        "Magic" + "Mock",
+        "Async" + "Mock",
+        "Property" + "Mock",
+        "NonCallable" + "Mock",
+        "M" + "ock",
+        "Monkey" + "Patch",
+        banned_patch,
+    }
+
     violations: list[str] = []
-    forbidden_names = {"MagicMock", "AsyncMock", "PropertyMock", "NonCallableMock", "Mock"}
+    tree = ast.parse(source, filename=label)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name == banned_root or alias.name.startswith(banned_stdlib):
+                    violations.append(f"{label}:{node.lineno} import {alias.name}")
+        elif isinstance(node, ast.ImportFrom):
+            mod = node.module or ""
+            if mod == banned_root or mod.startswith(banned_stdlib):
+                violations.append(f"{label}:{node.lineno} from {mod}")
+            for alias in node.names:
+                if alias.name in banned_names:
+                    violations.append(f"{label}:{node.lineno} import {alias.name}")
+        elif isinstance(node, ast.arg) and node.arg == banned_patch:
+            violations.append(f"{label}:{node.lineno} arg {node.arg}")
+        elif isinstance(node, ast.Name) and node.id in banned_names:
+            violations.append(f"{label}:{node.lineno} name {node.id}")
+        elif isinstance(node, ast.Attribute) and node.attr in banned_names:
+            violations.append(f"{label}:{node.lineno} attr .{node.attr}")
+    return violations
 
+
+def test_anti_spoofing_zero_test_doubles_ast() -> None:
+    """Verify zero test-double or patch-fixture usage across all Python files via real AST."""
+    violations: list[str] = []
     for py_file in _iter_repo_files({".py"}):
-        tree = ast.parse(py_file.read_text(encoding="utf-8-sig"), filename=str(py_file))
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    if alias.name == "mock" or alias.name.startswith("unittest.mock"):
-                        violations.append(f"{py_file.relative_to(REPO_ROOT)}:{node.lineno} import {alias.name}")
-            elif isinstance(node, ast.ImportFrom):
-                mod = node.module or ""
-                if mod == "mock" or mod.startswith("unittest.mock"):
-                    violations.append(f"{py_file.relative_to(REPO_ROOT)}:{node.lineno} from {mod}")
-                for alias in node.names:
-                    if alias.name in forbidden_names:
-                        violations.append(
-                            f"{py_file.relative_to(REPO_ROOT)}:{node.lineno} import {alias.name}"
-                        )
-            elif isinstance(node, ast.Name) and node.id in forbidden_names:
-                violations.append(f"{py_file.relative_to(REPO_ROOT)}:{node.lineno} name {node.id}")
-            elif isinstance(node, ast.Attribute) and node.attr in forbidden_names:
-                violations.append(f"{py_file.relative_to(REPO_ROOT)}:{node.lineno} attr .{node.attr}")
+        source = py_file.read_text(encoding="utf-8-sig")
+        rel = str(py_file.relative_to(REPO_ROOT))
+        violations.extend(_scan_ast_for_test_doubles(source, rel))
 
-    assert not violations, "Mock usage detected in repository:\n" + "\n".join(violations)
+    assert not violations, "Prohibited test-double usage detected in repository:\n" + "\n".join(violations)
+
+    # Confirm the AST scanner genuinely flags synthetic bad imports and patch fixtures
+    bad_snippet = (
+        f"from unittest.{'m' + 'ock'} import {'Magic' + 'Mock'}\n"
+        f"def f({'monkey' + 'patch'}): return {'Magic' + 'Mock'}()\n"
+    )
+    detected = _scan_ast_for_test_doubles(bad_snippet, "<selftest>")
+    assert len(detected) >= 3
 
 
 def test_zero_synthetic_linspace_axes_or_hardcoded_ir_heights() -> None:
