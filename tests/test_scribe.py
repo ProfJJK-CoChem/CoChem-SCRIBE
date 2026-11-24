@@ -7,6 +7,7 @@ and strict verified-figure assertions (never passes with figures_generated == 0)
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import sys
@@ -29,118 +30,118 @@ import scribe_orchestration
 import scribe_payload_builder
 
 
-def test_payload_builder_crossref_caching(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    cache_file = tmp_path / "crossref_cache.json"
-    cache_file.write_text(
-        json.dumps(
-            {
-                "Grimme D4": {
-                    "author": "Caldeweyher, E. et al.",
-                    "title": "A generally applicable atomic-charge dependent London dispersion correction",
-                    "journal": "J. Chem. Phys.",
-                    "year": "2019",
-                    "volume": "150",
-                    "pages": "154122",
-                    "DOI": "10.1063/1.5090222",
+def test_payload_builder_crossref_caching(tmp_path: Path) -> None:
+    with contextlib.chdir(tmp_path):
+        cache_file = tmp_path / "crossref_cache.json"
+        cache_file.write_text(
+            json.dumps(
+                {
+                    "Grimme D4": {
+                        "author": "Caldeweyher, E. et al.",
+                        "title": "A generally applicable atomic-charge dependent London dispersion correction",
+                        "journal": "J. Chem. Phys.",
+                        "year": "2019",
+                        "volume": "150",
+                        "pages": "154122",
+                        "DOI": "10.1063/1.5090222",
+                    }
                 }
+            ),
+            encoding="utf-8",
+        )
+        builder = scribe_payload_builder.ScribePayloadBuilder()
+        cits = builder._query_crossref_citations(["Grimme D4"])
+        assert "Grimme D4" in cits
+        assert cits["Grimme D4"]["DOI"] == "10.1063/1.5090222"
+        assert cache_file.exists()
+
+
+def test_payload_builder_bibtex_generation(tmp_path: Path) -> None:
+    with contextlib.chdir(tmp_path):
+        builder = scribe_payload_builder.ScribePayloadBuilder()
+        cits = {
+            "TestTheory": {
+                "author": "Smith, J.",
+                "title": "Test Method",
+                "journal": "J. Chem. Phys.",
+                "year": "2024",
+                "volume": "150",
+                "pages": "100-110",
+                "DOI": "10.1063/1.12345",
             }
-        ),
-        encoding="utf-8",
-    )
-    builder = scribe_payload_builder.ScribePayloadBuilder()
-    cits = builder._query_crossref_citations(["Grimme D4"])
-    assert "Grimme D4" in cits
-    assert cits["Grimme D4"]["DOI"] == "10.1063/1.5090222"
-    assert cache_file.exists()
-
-
-def test_payload_builder_bibtex_generation(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    builder = scribe_payload_builder.ScribePayloadBuilder()
-    cits = {
-        "TestTheory": {
-            "author": "Smith, J.",
-            "title": "Test Method",
-            "journal": "J. Chem. Phys.",
-            "year": "2024",
-            "volume": "150",
-            "pages": "100-110",
-            "DOI": "10.1063/1.12345",
         }
-    }
-    bib = builder._generate_bibtex(cits)
-    assert "@article" in bib
-    assert "J. Chem. Phys." in bib
-    assert "10.1063/1.12345" in bib
+        bib = builder._generate_bibtex(cits)
+        assert "@article" in bib
+        assert "J. Chem. Phys." in bib
+        assert "10.1063/1.12345" in bib
 
 
-def test_extract_energetics_table(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    h5_path = tmp_path / "cochem_state.h5"
-    with h5py.File(h5_path, "w") as f:
-        g1 = f.create_group("conformer_001")
-        g1.attrs["energy"] = -76.324556
-        g1.attrs["enthalpy"] = -76.300100
-        g1.attrs["gibbs_free_energy"] = -76.321500
-    builder = scribe_payload_builder.ScribePayloadBuilder()
-    tbl = builder.extract_energetics_table()
-    assert "\\begin{table}" in tbl
-    assert "conformer_001" in tbl
-    assert (tmp_path / "manuscript_tables.tex").exists()
+def test_extract_energetics_table(tmp_path: Path) -> None:
+    with contextlib.chdir(tmp_path):
+        h5_path = tmp_path / "cochem_state.h5"
+        with h5py.File(h5_path, "w") as f:
+            g1 = f.create_group("conformer_001")
+            g1.attrs["energy"] = -76.324556
+            g1.attrs["enthalpy"] = -76.300100
+            g1.attrs["gibbs_free_energy"] = -76.321500
+        builder = scribe_payload_builder.ScribePayloadBuilder()
+        tbl = builder.extract_energetics_table()
+        assert "\\begin{table}" in tbl
+        assert "conformer_001" in tbl
+        assert (tmp_path / "manuscript_tables.tex").exists()
 
 
-def test_doc_manager_chunked_compression(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_doc_manager_chunked_compression(tmp_path: Path) -> None:
     """Real HDF5 dataset chunked Zstandard compression and decompression round-trip."""
-    monkeypatch.chdir(tmp_path)
-    h5_path = tmp_path / "real_tensor.h5"
-    expected_array = np.arange(256, dtype=np.float64) * 0.125
-    with h5py.File(h5_path, "w") as f:
-        f.create_dataset("verified_pes_slice", data=expected_array)
+    with contextlib.chdir(tmp_path):
+        h5_path = tmp_path / "real_tensor.h5"
+        expected_array = np.arange(256, dtype=np.float64) * 0.125
+        with h5py.File(h5_path, "w") as f:
+            f.create_dataset("verified_pes_slice", data=expected_array)
 
-    out_zst = tmp_path / "verified_pes_slice.tar.zst"
-    manager = scribe_doc_manager.ScribeDocumentManager()
+        out_zst = tmp_path / "verified_pes_slice.tar.zst"
+        manager = scribe_doc_manager.ScribeDocumentManager()
 
-    with h5py.File(h5_path, "r") as f:
-        ds = f["verified_pes_slice"]
-        if scribe_doc_manager.zstd is None:
-            with pytest.raises(ImportError, match="zstandard"):
+        with h5py.File(h5_path, "r") as f:
+            ds = f["verified_pes_slice"]
+            if scribe_doc_manager.zstd is None:
+                with pytest.raises(ImportError, match="zstandard"):
+                    manager._compress_dataset_chunked(ds, out_zst)
+            else:
                 manager._compress_dataset_chunked(ds, out_zst)
-        else:
-            manager._compress_dataset_chunked(ds, out_zst)
-            assert out_zst.exists()
-            assert out_zst.stat().st_size > 0
-            dctx = scribe_doc_manager.zstd.ZstdDecompressor()
-            with out_zst.open("rb") as fh:
-                with dctx.stream_reader(fh) as reader:
-                    raw = reader.read()
-            recovered = np.frombuffer(raw, dtype=np.float64)
-            np.testing.assert_array_equal(recovered, expected_array)
+                assert out_zst.exists()
+                assert out_zst.stat().st_size > 0
+                dctx = scribe_doc_manager.zstd.ZstdDecompressor()
+                with out_zst.open("rb") as fh:
+                    with dctx.stream_reader(fh) as reader:
+                        raw = reader.read()
+                recovered = np.frombuffer(raw, dtype=np.float64)
+                np.testing.assert_array_equal(recovered, expected_array)
 
 
-def test_legacy_bundler_checksum_and_zstd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    bundler = scribe_legacy_bundler.LegacyVerificationBundler()
-    sample_lin = tmp_path / "sample_h2o.lin"
-    sample_lin.write_text("1 0 1 0 0 0 12500.00 0.05 1.0\n", encoding="utf-8")
-    bundler.legacy_files = [sample_lin]
+def test_legacy_bundler_checksum_and_zstd(tmp_path: Path) -> None:
+    with contextlib.chdir(tmp_path):
+        bundler = scribe_legacy_bundler.LegacyVerificationBundler()
+        sample_lin = tmp_path / "sample_h2o.lin"
+        sample_lin.write_text("1 0 1 0 0 0 12500.00 0.05 1.0\n", encoding="utf-8")
+        bundler.legacy_files = [sample_lin]
 
-    if scribe_legacy_bundler.zstd is None:
-        with pytest.raises(ImportError, match="zstandard"):
-            bundler.compress_zstd_legacy_file(sample_lin)
-        return
+        if scribe_legacy_bundler.zstd is None:
+            with pytest.raises(ImportError, match="zstandard"):
+                bundler.compress_zstd_legacy_file(sample_lin)
+            return
 
-    bundler.create_legacy_bundle()
-    assert (tmp_path / "Legacy_Verification.zip").exists()
-    assert (tmp_path / "checksums.sha256").exists()
+        bundler.create_legacy_bundle()
+        assert (tmp_path / "Legacy_Verification.zip").exists()
+        assert (tmp_path / "checksums.sha256").exists()
 
-    with zipfile.ZipFile(tmp_path / "Legacy_Verification.zip", "r") as zf:
-        names = zf.namelist()
-        assert "sample_h2o.lin" in names
-        assert "sample_h2o.lin.zst" in names
-        assert "checksums.sha256" in names
-        dctx = scribe_legacy_bundler.zstd.ZstdDecompressor()
-        assert dctx.decompress(zf.read("sample_h2o.lin.zst")) == sample_lin.read_bytes()
+        with zipfile.ZipFile(tmp_path / "Legacy_Verification.zip", "r") as zf:
+            names = zf.namelist()
+            assert "sample_h2o.lin" in names
+            assert "sample_h2o.lin.zst" in names
+            assert "checksums.sha256" in names
+            dctx = scribe_legacy_bundler.zstd.ZstdDecompressor()
+            assert dctx.decompress(zf.read("sample_h2o.lin.zst")) == sample_lin.read_bytes()
 
 
 def test_figure_generator_real_verified_hdf5_and_no_synthetic_axes(tmp_path: Path) -> None:
@@ -207,12 +208,12 @@ def test_figure_generator_real_verified_hdf5_and_no_synthetic_axes(tmp_path: Pat
         gen_bad_ir._generate_torq_artifacts()
 
 
-def test_inference_engine_offline_fallback(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    engine = scribe_inference.ScribeInferenceEngine()
-    engine.api_key = ""
-    res = engine._fallback_offline_jinja_rendering()
-    assert "Notice: Generated via Offline Fallback Engine" in res
+def test_inference_engine_offline_fallback(tmp_path: Path) -> None:
+    with contextlib.chdir(tmp_path):
+        engine = scribe_inference.ScribeInferenceEngine()
+        engine.api_key = ""
+        res = engine._fallback_offline_jinja_rendering()
+        assert "Notice: Generated via Offline Fallback Engine" in res
 
 
 def test_orchestration_structure() -> None:
@@ -243,19 +244,19 @@ def test_cochem_scribe_compiler(tmp_path: Path) -> None:
     assert out_tex.exists()
 
 
-def test_cochem_scribe_master(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    from cochem_scribe_master import MethodologyTracker
+def test_cochem_scribe_master(tmp_path: Path) -> None:
+    with contextlib.chdir(tmp_path):
+        from cochem_scribe_master import MethodologyTracker
 
-    tracker = MethodologyTracker()
-    tracker.compute_flags = {"MPQC_4", "MACE_OFF24m", "CCSD(T)-F12"}
-    m_path = tmp_path / "test_methods.tex"
-    r_path = tmp_path / "test_references.bib"
-    m_tex = tracker.render_methods_tex(str(m_path))
-    r_bib = tracker.render_references_bib(str(r_path))
-    assert "\\section{Computational Methods}" in m_tex
-    assert "@article" in r_bib
-    assert "MPQC" in m_tex or "CCSD" in m_tex
+        tracker = MethodologyTracker()
+        tracker.compute_flags = {"MPQC_4", "MACE_OFF24m", "CCSD(T)-F12"}
+        m_path = tmp_path / "test_methods.tex"
+        r_path = tmp_path / "test_references.bib"
+        m_tex = tracker.render_methods_tex(str(m_path))
+        r_bib = tracker.render_references_bib(str(r_path))
+        assert "\\section{Computational Methods}" in m_tex
+        assert "@article" in r_bib
+        assert "MPQC" in m_tex or "CCSD" in m_tex
 
 
 def test_state_tensor_provenance_hash(tmp_path: Path) -> None:
@@ -337,20 +338,20 @@ def test_state_tensor_provenance_hash_audit(tmp_path: Path) -> None:
         assert audit["[D]"] >= 1
 
 
-def test_payload_builder_v4_schema(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.chdir(tmp_path)
-    builder = scribe_payload_builder.ScribePayloadBuilder()
-    payload = builder.get_payload()
-    assert "product_class" in payload
-    assert "tier_category" in payload
-    assert "tier_tag" in payload
-    assert "max_mace_batch_size" in payload
-    assert "standing_rule_7_violations" in payload
+def test_payload_builder_v4_schema(tmp_path: Path) -> None:
+    with contextlib.chdir(tmp_path):
+        builder = scribe_payload_builder.ScribePayloadBuilder()
+        payload = builder.get_payload()
+        assert "product_class" in payload
+        assert "tier_category" in payload
+        assert "tier_tag" in payload
+        assert "max_mace_batch_size" in payload
+        assert "standing_rule_7_violations" in payload
 
-    prompt = builder.construct_user_guide_prompt()
-    assert "Max MACE-OFF24m Batch Size" in prompt
-    assert "Product Class" in prompt
-    assert "Standing Rule 7 Audit" in prompt
+        prompt = builder.construct_user_guide_prompt()
+        assert "Max MACE-OFF24m Batch Size" in prompt
+        assert "Product Class" in prompt
+        assert "Standing Rule 7 Audit" in prompt
 
 
 def test_scribe_orchestration_v4_tiers() -> None:

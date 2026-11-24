@@ -94,13 +94,19 @@ Supported operations:
 
 ---
 
-## 5. Citation Policy
+## 5. Documentation & User Guide
+
+- **[User Guide (`docs/USER_GUIDE.md`)](docs/USER_GUIDE.md)** — Worked CLI and Python examples for `render_geom_comparison`, `render_kinetic_rxn_profile`, `verify_source_register`, `audit_farir_exclusion`, `CoChem-BASE` provider handoffs, and `CoChem-SPYFY` legacy Pickett verification bundling.
+
+---
+
+## 6. Citation Policy
 
 If this module is utilized in the generation of published figures or tables, please cite:
 - *Klaassen, J. J. et al. "CoChem: Reproducible Ab Initio and Spectroscopic Workflows." Tennessee Tech University (2026).*
 
 ---
 
-## 6. License
+## 7. License
 
 Licensed under the **Apache License, Version 2.0** (the "License"). You may not use this repository except in compliance with the License. See [LICENSE](LICENSE) for the full text.
