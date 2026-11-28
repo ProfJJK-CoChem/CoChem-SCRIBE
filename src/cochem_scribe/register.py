@@ -56,8 +56,14 @@ class FigureRegisterEntry(BaseModel):
 
 
 def default_manifest_path() -> Path:
-    """Return the repository-tracked 19-entry in-scope figure register manifest."""
-    return Path(__file__).resolve().parents[2] / "manifests" / "in_scope_figure_register.json"
+    """Return the 19-entry in-scope figure register manifest (source checkout or packaged wheel)."""
+    repo_manifest = Path(__file__).resolve().parents[2] / "manifests" / "in_scope_figure_register.json"
+    if repo_manifest.is_file():
+        return repo_manifest
+    packaged_manifest = Path(__file__).resolve().parent / "manifests" / "in_scope_figure_register.json"
+    if packaged_manifest.is_file():
+        return packaged_manifest
+    return repo_manifest
 
 
 def audit_farir_exclusion(

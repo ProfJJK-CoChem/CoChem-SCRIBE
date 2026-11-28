@@ -133,12 +133,13 @@ def render_geom_comparison(
     out_pdf: str | Path,
     *,
     manifest_path: str | Path | None = None,
+    allow_pending_optional: bool = True,
 ) -> dict[str, Any]:
     """Render CoChem-GEOM's verified structural comparison JSON to PNG + PDF.
 
     Plots separated:
       - r_e (ORCA CCSD/cc-pVTZ)
-      - r_e (PySCF CCSD/cc-pVDZ)
+      - r_e (PySCF CCSD/cc-pVDZ; rendered explicitly as PENDING when optional QM was not run)
       - r_s (Kraitchman +/- sigma_Costain)
       - r_0 (Weighted fit +/- sigma_scaled)
       - r_e^SE (explicitly annotated as PENDING when unverified; never equated to r_0)
@@ -161,30 +162,47 @@ def render_geom_comparison(
     if not isinstance(columns, dict):
         raise ValueError("Comparison JSON missing 'columns' mapping.")
 
-    required_verified = (
-        ("r_e_ccsd_cc_pvtz_orca", "r_e\nORCA CCSD\ncc-pVTZ", None, None),
-        ("r_e_ccsd_cc_pvdz_pyscf", "r_e\nPySCF CCSD\ncc-pVDZ", None, None),
+    column_specs = (
+        ("r_e_ccsd_cc_pvtz_orca", "r_e\nORCA CCSD\ncc-pVTZ", None, None, True),
+        ("r_e_ccsd_cc_pvdz_pyscf", "r_e\nPySCF CCSD\ncc-pVDZ", None, None, True),
         (
             "r_s_kraitchman",
             "r_s\nKraitchman\n(±σ_Costain)",
             "bond_costain_uncertainty_angstrom",
             "angle_costain_uncertainty_deg",
+            False,
         ),
         (
             "r_0_weighted_fit",
             "r_0\nWeighted Fit\n(±σ_scaled)",
             "bond_std_err_scaled_angstrom",
             "angle_std_err_scaled_deg",
+            False,
         ),
     )
 
     summaries: list[GeomColumnSummary] = []
-    for key, label, bond_unc_key, angle_unc_key in required_verified:
+    verified_re_count = 0
+    for key, label, bond_unc_key, angle_unc_key, is_optional_re in column_specs:
         if key not in columns or not isinstance(columns[key], dict):
-            raise ValueError(f"Missing required verified column {key!r} in {src_path}")
+            raise ValueError(f"Missing required structural column {key!r} in {src_path}")
         col = columns[key]
         status = str(col.get("status", "UNKNOWN")).upper()
         if status != "VERIFIED":
+            if allow_pending_optional and is_optional_re and status == "PENDING":
+                summaries.append(
+                    GeomColumnSummary(
+                        key=key,
+                        label=label,
+                        status="PENDING",
+                        bond_angstrom=None,
+                        bond_uncertainty_angstrom=None,
+                        angle_deg=None,
+                        angle_uncertainty_deg=None,
+                        note=str(col.get("reason") or "Optional QM column not computed."),
+                    )
+                )
+                continue
             raise ValueError(
                 f"Column {key!r} has status {status!r}; render_geom_comparison "
                 "refuses to plot unverified structural columns."
@@ -201,6 +219,8 @@ def render_geom_comparison(
             if angle_unc_key
             else None
         )
+        if is_optional_re:
+            verified_re_count += 1
         summaries.append(
             GeomColumnSummary(
                 key=key,
@@ -211,6 +231,12 @@ def render_geom_comparison(
                 angle_deg=angle_val,
                 angle_uncertainty_deg=angle_unc,
             )
+        )
+
+    if verified_re_count == 0:
+        raise ValueError(
+            "At least one verified equilibrium r_e column (ORCA or PySCF) is required; "
+            "render_geom_comparison refuses to plot without a verified equilibrium reference."
         )
 
     # r_e^SE column: must remain explicitly PENDING if unverified or null
@@ -242,8 +268,8 @@ def render_geom_comparison(
     exp_prov = payload.get("experimental_provenance", {})
     source_doi = str(exp_prov.get("source_doi", "N/A"))
 
-    orca_sha = str(columns["r_e_ccsd_cc_pvtz_orca"].get("output_sha256", "N/A"))
-    pyscf_sha = str(columns["r_e_ccsd_cc_pvdz_pyscf"].get("output_sha256", "N/A"))
+    orca_sha = str(columns["r_e_ccsd_cc_pvtz_orca"].get("output_sha256") or "PENDING")
+    pyscf_sha = str(columns["r_e_ccsd_cc_pvdz_pyscf"].get("output_sha256") or "PENDING")
 
     _apply_publication_rc()
     fig, (ax_r, ax_a) = plt.subplots(1, 2, figsize=(12.2, 5.4), dpi=300)
@@ -271,12 +297,14 @@ def render_geom_comparison(
     r_ylim = (min(r_lows) - 0.28 * r_span, max(r_highs) + 0.36 * r_span)
     a_ylim = (min(a_lows) - 0.28 * a_span, max(a_highs) + 0.36 * a_span)
 
-    # Subtle reference line at ORCA CCSD/cc-pVTZ equilibrium value
-    orca_r = summaries[0].bond_angstrom
-    orca_a = summaries[0].angle_deg
-    assert orca_r is not None and orca_a is not None
-    ax_r.axhline(orca_r, color="#0072B2", linestyle=":", linewidth=1.0, alpha=0.55, zorder=1)
-    ax_a.axhline(orca_a, color="#0072B2", linestyle=":", linewidth=1.0, alpha=0.55, zorder=1)
+    # Subtle reference line at first verified equilibrium r_e value
+    ref_re = next(
+        (s for s in summaries if s.key.startswith("r_e_") and s.status == "VERIFIED"),
+        None,
+    )
+    if ref_re is not None and ref_re.bond_angstrom is not None and ref_re.angle_deg is not None:
+        ax_r.axhline(ref_re.bond_angstrom, color="#0072B2", linestyle=":", linewidth=1.0, alpha=0.55, zorder=1)
+        ax_a.axhline(ref_re.angle_deg, color="#0072B2", linestyle=":", linewidth=1.0, alpha=0.55, zorder=1)
 
     for idx, s in enumerate(summaries):
         color = palette[idx]
@@ -358,10 +386,15 @@ def render_geom_comparison(
                     zorder=2,
                 )
                 mid_y = 0.5 * (ylim[0] + ylim[1])
+                pending_label = (
+                    "PENDING\n(requires ΔB_vib)"
+                    if s.key == "r_e_se"
+                    else "PENDING\n(not computed)"
+                )
                 ax.text(
                     idx,
                     mid_y,
-                    "PENDING\n(requires ΔB_vib)",
+                    pending_label,
                     ha="center",
                     va="center",
                     fontsize=8.2,
