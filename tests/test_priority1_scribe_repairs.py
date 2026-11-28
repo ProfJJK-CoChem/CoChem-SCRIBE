@@ -48,6 +48,12 @@ def test_render_geom_allows_pending_optional_pyscf_and_strict_rejects(tmp_path: 
     with pytest.raises(ValueError, match="r_e_ccsd_cc_pvdz_pyscf"):
         render_geom_comparison(student_json, tmp_path / "s.png", tmp_path / "s.pdf", allow_pending_optional=False)
 
+    # Strict mode SUCCEEDS when all four required columns (ORCA + PySCF + r_s + r_0) are VERIFIED
+    strict_png = tmp_path / "strict_ok.png"
+    strict_pdf = tmp_path / "strict_ok.pdf"
+    assert cli_main(["render-geom", "--strict", "--input", str(GEOM_COMPARISON_JSON), "--out-png", str(strict_png), "--out-pdf", str(strict_pdf)]) == 0
+    assert strict_png.is_file() and strict_pdf.is_file()
+
     # Zero verified r_e columns MUST fail closed even in default mode
     both_pending = json.loads(json.dumps(payload))
     both_pending["columns"]["r_e_ccsd_cc_pvtz_orca"] = {"status": "PENDING", "bond_angstrom": None, "angle_deg": None}
