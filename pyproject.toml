@@ -45,6 +45,9 @@ scribe = "cochem_scribe.provider:scribe_provider"
 where = ["src"]
 include = ["cochem_scribe*"]
 
+[tool.setuptools.package-data]
+cochem_scribe = ["manifests/*.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src", "."]

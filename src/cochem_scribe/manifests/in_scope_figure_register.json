@@ -1,0 +1,226 @@
+{
+  "schema_version": "cochem.scribe.figure-source-register/1",
+  "policy": "Metadata and SHA-256 provenance register for all 19 in-scope figures (4 FTMW methodology manuscript + 15 Keratin v1.1.0). Private manuscript scripts and archival PDFs remain exclusively on Instructor Google Drive and are never duplicated into this public repository. Out-of-scope encyclopedia material is strictly excluded.",
+  "private_assets_bundled_in_repo": false,
+  "source_register_csv_sha256": "45f3e8bbbdfa7b62f6e49213328de0c7667ba9384659b2cb54acba4a5dddd984",
+  "total_figures": 19,
+  "collection_counts": {
+    "FTMW methodology manuscript": 4,
+    "Keratin v1.1.0": 15
+  },
+  "scope_exclusion_gate": {
+    "status": "PASSED",
+    "violation_count": 0
+  },
+  "entries": [
+    {
+      "collection": "FTMW methodology manuscript",
+      "figure": "fig1_challenge1_14n_hyperfine",
+      "evidence_class": "Manuscript-linked original",
+      "source_script_or_archive_member": "G:\\My Drive\\_Publications\\FTMW_Methodology_2026\\scripts\\generate_figures.py",
+      "script_sha256": "486993e4517221849c0bacb5c302bcf26fd091495d42a4114768dec190fe269c",
+      "archived_reference_image": "G:\\My Drive\\_Publications\\FTMW_Methodology_2026\\figures\\fig1_challenge1_14n_hyperfine.pdf",
+      "reference_sha256": "96db3470f50388cdffff5607af6fdb23a6b62a4cf50be89d37a42f461ee5c0b0",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1okRDPwSoQcAA8MgGvGqyj_oITwz83FFW",
+      "required_work_before_reproduction_or_release": "Use pinned benchmark JSON and residuals CSV; preserve missing levels; replace absolute input and mirror paths; compare plotted numeric arrays."
+    },
+    {
+      "collection": "FTMW methodology manuscript",
+      "figure": "fig2_challenge2_tunneling_coriolis",
+      "evidence_class": "Manuscript-linked original",
+      "source_script_or_archive_member": "G:\\My Drive\\_Publications\\FTMW_Methodology_2026\\scripts\\generate_figures.py",
+      "script_sha256": "486993e4517221849c0bacb5c302bcf26fd091495d42a4114768dec190fe269c",
+      "archived_reference_image": "G:\\My Drive\\_Publications\\FTMW_Methodology_2026\\figures\\fig2_challenge2_tunneling_coriolis.pdf",
+      "reference_sha256": "737d2cd76d9f126eac2aed120aaf5117b46c777c21e492f872e8b00d844bace8",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1okRDPwSoQcAA8MgGvGqyj_oITwz83FFW",
+      "required_work_before_reproduction_or_release": "Use pinned benchmark JSON and residuals CSV; preserve missing levels; replace absolute input and mirror paths; compare plotted numeric arrays."
+    },
+    {
+      "collection": "FTMW methodology manuscript",
+      "figure": "fig3_challenge3_floppy_isotopologue",
+      "evidence_class": "Manuscript-linked original",
+      "source_script_or_archive_member": "G:\\My Drive\\_Publications\\FTMW_Methodology_2026\\scripts\\generate_figures.py",
+      "script_sha256": "486993e4517221849c0bacb5c302bcf26fd091495d42a4114768dec190fe269c",
+      "archived_reference_image": "G:\\My Drive\\_Publications\\FTMW_Methodology_2026\\figures\\fig3_challenge3_floppy_isotopologue.pdf",
+      "reference_sha256": "46dbe9890f4600d4e72408f727fc8671fcfa0ad7048d4f6ede9a4b47fda48a7a",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1okRDPwSoQcAA8MgGvGqyj_oITwz83FFW",
+      "required_work_before_reproduction_or_release": "Use pinned benchmark JSON and residuals CSV; preserve missing levels; replace absolute input and mirror paths; compare plotted numeric arrays."
+    },
+    {
+      "collection": "FTMW methodology manuscript",
+      "figure": "fig4_hierarchy_rmsd_study_targets",
+      "evidence_class": "Manuscript-linked original",
+      "source_script_or_archive_member": "G:\\My Drive\\_Publications\\FTMW_Methodology_2026\\scripts\\generate_figures.py",
+      "script_sha256": "486993e4517221849c0bacb5c302bcf26fd091495d42a4114768dec190fe269c",
+      "archived_reference_image": "G:\\My Drive\\_Publications\\FTMW_Methodology_2026\\figures\\fig4_hierarchy_rmsd_study_targets.pdf",
+      "reference_sha256": "22f5e16e1a40117d30fc11eaffd079fefeb90fef2e65f39ef01fa7411a89e340",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1okRDPwSoQcAA8MgGvGqyj_oITwz83FFW",
+      "required_work_before_reproduction_or_release": "Use pinned benchmark JSON and residuals CSV; preserve missing levels; replace absolute input and mirror paths; compare plotted numeric arrays."
+    },
+    {
+      "collection": "Keratin v1.1.0",
+      "figure": "Fig00",
+      "evidence_class": "Provenance-controlled reconstruction / working preview",
+      "source_script_or_archive_member": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generate_Fig00.py",
+      "script_sha256": "1167e9855c990f4425a4aad9bba39c574c0657517626d46f7f58a33b928a84d3",
+      "archived_reference_image": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generated/Fig00.pdf",
+      "reference_sha256": "a6c42cce0da1b753a7444fef1b4cd80f76a6e8e2ccae1477a69cb2e074b668d7",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1qf4RKrXN4gWnmdfaJz8iSz7FvbcmxgOC",
+      "required_work_before_reproduction_or_release": "Audit panel JSON and exact per-series arrays; keep unavailable evidence marked TBD."
+    },
+    {
+      "collection": "Keratin v1.1.0",
+      "figure": "Fig00B",
+      "evidence_class": "Provenance-controlled reconstruction / working preview",
+      "source_script_or_archive_member": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generate_Fig00B.py",
+      "script_sha256": "818c3a2179e20b74204975e2582c47dfedd51f2fdc80197a7247734c5aafcf04",
+      "archived_reference_image": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generated/Fig00B.pdf",
+      "reference_sha256": "ddd885cccfa5861231fbc610f0b49395cd4d1eb97628ecab30ecb1665a71b9de",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1qf4RKrXN4gWnmdfaJz8iSz7FvbcmxgOC",
+      "required_work_before_reproduction_or_release": "Audit panel JSON and exact per-series arrays; keep unavailable evidence marked TBD."
+    },
+    {
+      "collection": "Keratin v1.1.0",
+      "figure": "Fig00C",
+      "evidence_class": "Provenance-controlled reconstruction / working preview",
+      "source_script_or_archive_member": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generate_Fig00C.py",
+      "script_sha256": "22592fdfe21b63d3612ff502c2af17cae9e09eec353daaaba94e3349d8fd74f0",
+      "archived_reference_image": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generated/Fig00C.pdf",
+      "reference_sha256": "7c991a5f22ad8cac023a27c51baf96398fe818771d3e342447c16a6f67d2be7b",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1qf4RKrXN4gWnmdfaJz8iSz7FvbcmxgOC",
+      "required_work_before_reproduction_or_release": "Audit panel JSON and exact per-series arrays; keep unavailable evidence marked TBD."
+    },
+    {
+      "collection": "Keratin v1.1.0",
+      "figure": "Fig01A",
+      "evidence_class": "Provenance-controlled reconstruction / working preview",
+      "source_script_or_archive_member": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generate_Fig01A.py",
+      "script_sha256": "361360d915859143468e66edd765a4cedb3a1db364d832104468e0f53b5e9558",
+      "archived_reference_image": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generated/Fig01A.pdf",
+      "reference_sha256": "081cd5d62c6a9887b9fba26c283699c6f306957fae9c703fd9631e4a75d0332c",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1qf4RKrXN4gWnmdfaJz8iSz7FvbcmxgOC",
+      "required_work_before_reproduction_or_release": "Audit panel JSON and exact per-series arrays; keep unavailable evidence marked TBD."
+    },
+    {
+      "collection": "Keratin v1.1.0",
+      "figure": "Fig02A",
+      "evidence_class": "Measurement-backed reconstruction / working preview",
+      "source_script_or_archive_member": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generate_Fig02A.py",
+      "script_sha256": "7cf1264f1df830888284c2b4bd4f3e1f73c1b28a39175c5328d61db50038180e",
+      "archived_reference_image": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generated/Fig02A.pdf",
+      "reference_sha256": "663ea439ee918166a8b3ed4e964dc45a66e4ad0a164b0b43bb2ddb5c78a18f27",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1qf4RKrXN4gWnmdfaJz8iSz7FvbcmxgOC",
+      "required_work_before_reproduction_or_release": "For the keratin directed study. Preserve acquisition IDs and gravimetric metadata where applicable; reproduce exported arrays."
+    },
+    {
+      "collection": "Keratin v1.1.0",
+      "figure": "Fig03A",
+      "evidence_class": "Measurement-backed reconstruction / working preview",
+      "source_script_or_archive_member": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generate_Fig03A.py",
+      "script_sha256": "53a876b03b33271a852b4986795146d14e1ddc62fbe78733429da601b0491f54",
+      "archived_reference_image": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generated/Fig03A.pdf",
+      "reference_sha256": "9593efda4205e4e621488d9064f2ecf1552d063c7fc5732f29c739931a55878b",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1qf4RKrXN4gWnmdfaJz8iSz7FvbcmxgOC",
+      "required_work_before_reproduction_or_release": "For the keratin directed study. Preserve acquisition IDs and gravimetric metadata where applicable; reproduce exported arrays."
+    },
+    {
+      "collection": "Keratin v1.1.0",
+      "figure": "Fig03B",
+      "evidence_class": "Provenance-controlled reconstruction / working preview",
+      "source_script_or_archive_member": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generate_Fig03B.py",
+      "script_sha256": "f7ef6c3ea6478eec87bd67fe1dcc3c9f42baed3c5acebca7e43e240887df6d94",
+      "archived_reference_image": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generated/Fig03B.pdf",
+      "reference_sha256": "63573bf69f837c0336cfaf0f279c4a8d5e8df7122247478ee058ba545fa13738",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1qf4RKrXN4gWnmdfaJz8iSz7FvbcmxgOC",
+      "required_work_before_reproduction_or_release": "Keep calibration pending until traceable measured standards and fit are accepted."
+    },
+    {
+      "collection": "Keratin v1.1.0",
+      "figure": "Fig04A",
+      "evidence_class": "Provenance-controlled reconstruction / working preview",
+      "source_script_or_archive_member": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generate_Fig04A.py",
+      "script_sha256": "0bc997d804b01246f17f8ccbd28ddaf7757a3f32997bd2f0ded8b5cc7b028e06",
+      "archived_reference_image": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generated/Fig04A.pdf",
+      "reference_sha256": "ce65c6dca0ad1babf71f86363ea63f05f5c6fa860e5ce3f65f17c15447f822de",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1qf4RKrXN4gWnmdfaJz8iSz7FvbcmxgOC",
+      "required_work_before_reproduction_or_release": "Measured windows available; require approved fit and residuals for fit claims."
+    },
+    {
+      "collection": "Keratin v1.1.0",
+      "figure": "Fig05A",
+      "evidence_class": "Provenance-controlled reconstruction / working preview",
+      "source_script_or_archive_member": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generate_Fig05A.py",
+      "script_sha256": "8147ff115769703ba93f47863862e6046e22291bc43908fca44a50aa112dd910",
+      "archived_reference_image": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generated/Fig05A.pdf",
+      "reference_sha256": "0ff58d092c21a40972bee60b5172826134f20c4744ff8ff5573e797cb75d5a06",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1qf4RKrXN4gWnmdfaJz8iSz7FvbcmxgOC",
+      "required_work_before_reproduction_or_release": "Audit panel JSON and exact per-series arrays; keep unavailable evidence marked TBD."
+    },
+    {
+      "collection": "Keratin v1.1.0",
+      "figure": "Fig06A",
+      "evidence_class": "Provenance-controlled reconstruction / working preview",
+      "source_script_or_archive_member": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generate_Fig06A.py",
+      "script_sha256": "a9c81bb125437fe190b5f2038ea9143e0e2ee39bdd304791b90cdbee4eb850ea",
+      "archived_reference_image": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generated/Fig06A.pdf",
+      "reference_sha256": "13521474b7a8343acf161aa941f45c756cc4fd5ae7cf039fc76156344060afc0",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1qf4RKrXN4gWnmdfaJz8iSz7FvbcmxgOC",
+      "required_work_before_reproduction_or_release": "Audit panel JSON and exact per-series arrays; keep unavailable evidence marked TBD."
+    },
+    {
+      "collection": "Keratin v1.1.0",
+      "figure": "Fig07A",
+      "evidence_class": "Provenance-controlled reconstruction / working preview",
+      "source_script_or_archive_member": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generate_Fig07A.py",
+      "script_sha256": "b65fd189c27434d833fa7561b7e479ad12c8398af2e707bf6cf42fe8fbc0dae9",
+      "archived_reference_image": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generated/Fig07A.pdf",
+      "reference_sha256": "fbbed0b03a36a1376c26f22b7fd1163cf2316a3fe73de3c816d8c5174ba50f14",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1qf4RKrXN4gWnmdfaJz8iSz7FvbcmxgOC",
+      "required_work_before_reproduction_or_release": "Audit panel JSON and exact per-series arrays; keep unavailable evidence marked TBD."
+    },
+    {
+      "collection": "Keratin v1.1.0",
+      "figure": "Fig08A",
+      "evidence_class": "Provenance-controlled reconstruction / working preview",
+      "source_script_or_archive_member": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generate_Fig08A.py",
+      "script_sha256": "aa39b0df550c04b5eed20891936d327ac63ce386cfb285e5a3035161d379a15a",
+      "archived_reference_image": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generated/Fig08A.pdf",
+      "reference_sha256": "5a7765a866f6344d74aee4e9f2cc76aa81426561d86ba29854bd6cc35c9eea7d",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1qf4RKrXN4gWnmdfaJz8iSz7FvbcmxgOC",
+      "required_work_before_reproduction_or_release": "Audit panel JSON and exact per-series arrays; keep unavailable evidence marked TBD."
+    },
+    {
+      "collection": "Keratin v1.1.0",
+      "figure": "Fig08B",
+      "evidence_class": "Provenance-controlled reconstruction / working preview",
+      "source_script_or_archive_member": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generate_Fig08B.py",
+      "script_sha256": "1c05eac35c711f745980fc5ed5861737152f767949072f3bff5726d43003e00d",
+      "archived_reference_image": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generated/Fig08B.pdf",
+      "reference_sha256": "e6dc2e4bc62ea082f5cbb7ef964390932f9d747b1d1d35bfccc6848d3b6f8a99",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1qf4RKrXN4gWnmdfaJz8iSz7FvbcmxgOC",
+      "required_work_before_reproduction_or_release": "Audit panel JSON and exact per-series arrays; keep unavailable evidence marked TBD."
+    },
+    {
+      "collection": "Keratin v1.1.0",
+      "figure": "Fig09A",
+      "evidence_class": "Provenance-controlled reconstruction / working preview",
+      "source_script_or_archive_member": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generate_Fig09A.py",
+      "script_sha256": "4a9ddd7303eed29787dc3990c710cb0d6e41bea16c9c4d7060eec86c8a1a5230",
+      "archived_reference_image": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generated/Fig09A.pdf",
+      "reference_sha256": "d49f49ad22de3992ca0023a47c70214a2cab6399171274640fcd41047b78ce14",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1qf4RKrXN4gWnmdfaJz8iSz7FvbcmxgOC",
+      "required_work_before_reproduction_or_release": "Audit panel JSON and exact per-series arrays; keep unavailable evidence marked TBD."
+    },
+    {
+      "collection": "Keratin v1.1.0",
+      "figure": "Fig10A",
+      "evidence_class": "Provenance-controlled reconstruction / working preview",
+      "source_script_or_archive_member": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generate_Fig10A.py",
+      "script_sha256": "f58bd98a133eca2911d1e487584bbea9924af1e006b95bea9a94545dc773083f",
+      "archived_reference_image": "G:\\My Drive\\_Research\\Figure_Generation\\Biomimetic_Keratin_Figure_Generators_v1.1.0.zip!/Figure_Generation/generated/Fig10A.pdf",
+      "reference_sha256": "11e26bbc682487f4e053585059caf8f84187df6507e621c3368b15f3dfd915a1",
+      "instructor_drive_source": "https://drive.google.com/drive/folders/1qf4RKrXN4gWnmdfaJz8iSz7FvbcmxgOC",
+      "required_work_before_reproduction_or_release": "Audit panel JSON and exact per-series arrays; keep unavailable evidence marked TBD."
+    }
+  ]
+}

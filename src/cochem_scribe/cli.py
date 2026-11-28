@@ -27,6 +27,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_geom.add_argument("--out-png", required=True, help="Output PNG figure path.")
     p_geom.add_argument("--out-pdf", required=True, help="Output PDF figure path.")
     p_geom.add_argument("--manifest", default=None, help="Optional SHA-256 provenance JSON path.")
+    p_geom.add_argument(
+        "--strict",
+        action="store_true",
+        help="Require both ORCA and PySCF r_e columns to be VERIFIED instead of plotting optional PENDING slots.",
+    )
 
     p_kin = sub.add_parser(
         "render-kinetic",
@@ -87,6 +92,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             out_png=args.out_png,
             out_pdf=args.out_pdf,
             manifest_path=args.manifest,
+            allow_pending_optional=not args.strict,
         )
         print(json.dumps(receipt, indent=2))
         return 0
