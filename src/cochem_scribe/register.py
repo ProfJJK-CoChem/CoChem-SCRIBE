@@ -14,6 +14,7 @@ import hashlib
 import json
 import re
 import zipfile
+from importlib import resources
 from pathlib import Path
 from typing import Any
 
@@ -55,9 +56,28 @@ class FigureRegisterEntry(BaseModel):
     required_work_before_reproduction_or_release: str
 
 
+def _packaged_manifest_resource() -> Any:
+    """Return the `importlib.resources` Traversable for the bundled figure register."""
+    return resources.files("cochem_scribe").joinpath("manifests", "in_scope_figure_register.json")
+
+
 def default_manifest_path() -> Path:
-    """Return the repository-tracked 19-entry in-scope figure register manifest."""
-    return Path(__file__).resolve().parents[2] / "manifests" / "in_scope_figure_register.json"
+    """Return the packaged 19-entry in-scope figure register manifest path.
+
+    Resolves package-bundled data first (wheel-safe via `cochem_scribe/manifests/`
+    and `importlib.resources`), falling back to the repository-root `manifests/`
+    directory for editable/source checkouts.
+    """
+    pkg_candidate = Path(__file__).resolve().parent / "manifests" / "in_scope_figure_register.json"
+    if pkg_candidate.is_file():
+        return pkg_candidate
+    repo_candidate = Path(__file__).resolve().parents[2] / "manifests" / "in_scope_figure_register.json"
+    if repo_candidate.is_file():
+        return repo_candidate
+    resource = _packaged_manifest_resource()
+    if resource.is_file():
+        return Path(str(resource))
+    return pkg_candidate
 
 
 def audit_farir_exclusion(
@@ -91,7 +111,7 @@ def audit_farir_exclusion(
             for k, v in obj.items():
                 _scan_obj(f"{prefix}.{k}" if prefix else str(k), k)
                 _scan_obj(f"{prefix}.{k}" if prefix else str(k), v)
-        elif isinstance(obj, (list, tuple)):
+        elif isinstance(obj, list | tuple):
             for i, item in enumerate(obj):
                 _scan_obj(f"{prefix}[{i}]", item)
 
@@ -184,17 +204,7 @@ def _load_entries_from_json(json_path: Path) -> list[FigureRegisterEntry]:
     return [FigureRegisterEntry.model_validate(item) for item in data["entries"]]
 
 
-def verify_source_register(
-    register_csv_path: str | Path | None = None,
-    *,
-    verify_on_disk: bool = False,
-) -> dict[str, Any]:
-    """Verify the 19-entry in-scope figure source register and enforce Far-IR exclusion.
-
-    Accepts either a CSV register or the packaged JSON manifest (defaults to
-    `manifests/in_scope_figure_register.json`).
-    """
-    path = Path(register_csv_path) if register_csv_path is not None else default_manifest_path()
+def _verify_register_file(path: Path, *, verify_on_disk: bool = False) -> dict[str, Any]:
     if not path.is_file():
         raise FileNotFoundError(f"Figure source register not found: {path}")
 
@@ -270,6 +280,31 @@ def verify_source_register(
         "disk_verified_figures": disk_verified_count if verify_on_disk else 0,
         "figures": [e.figure for e in entries],
     }
+
+
+def verify_source_register(
+    register_csv_path: str | Path | None = None,
+    *,
+    verify_on_disk: bool = False,
+) -> dict[str, Any]:
+    """Verify the 19-entry in-scope figure source register and enforce Far-IR exclusion.
+
+    Accepts either a CSV register or the packaged JSON manifest (defaults to
+    the bundled `cochem_scribe/manifests/in_scope_figure_register.json` resource).
+    """
+    if register_csv_path is not None:
+        return _verify_register_file(Path(register_csv_path), verify_on_disk=verify_on_disk)
+
+    candidate = default_manifest_path()
+    if candidate.is_file():
+        return _verify_register_file(candidate, verify_on_disk=verify_on_disk)
+
+    resource = _packaged_manifest_resource()
+    if resource.is_file():
+        with resources.as_file(resource) as extracted_path:
+            return _verify_register_file(extracted_path, verify_on_disk=verify_on_disk)
+
+    raise FileNotFoundError(f"Figure source register not found: {candidate}")
 
 
 def build_in_scope_register_manifest(

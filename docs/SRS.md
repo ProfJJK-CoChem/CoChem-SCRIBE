@@ -11,9 +11,9 @@ decision_ref: swarm-1126-8efd
 
 ## 1. Purpose, Scope & System Classification
 
-`CoChem-SCRIBE` (`ProfJJK-CoChem/CoChem-SCRIBE`, Python distribution `cochem-scribe` v0.2.0) is classified as an **`ACTIVE_CORE`** (`wave1_core_9`) repository in the CoChem Pipeline 5.0.0 ecosystem. It delivers deterministic, zero-fabrication scientific figure rendering, cryptographic SHA-256 source-register verification, far-IR exclusion auditing, and FAIR reporting primitives.
+`CoChem-SCRIBE` (`ProfJJK-CoChem/CoChem-SCRIBE`, Python distribution `cochem-scribe` v0.2.0) is classified as an **`ACTIVE_CORE`** (`wave1_core_9`) repository in the CoChem Pipeline 5.0.0 ecosystem. It delivers deterministic, zero-fabrication scientific figure rendering, cryptographic SHA-256 source-register verification, out-of-scope encyclopedia exclusion auditing, and FAIR reporting primitives.
 
-The shipped, installable package lives exclusively under `src/cochem_scribe/` (`pyproject.toml` `where = ["src"]`, `include = ["cochem_scribe*"]`) with console entrypoint `cochem-scribe = "cochem_scribe.cli:main"` exposing 5 subcommands (`render-geom`, `render-kinetic`, `verify-register`, `audit-farir`, `provider-info`). Primary active modules are `src/cochem_scribe/renderers.py`, `src/cochem_scribe/register.py`, `src/cochem_scribe/provider.py`, and `src/cochem_scribe/cli.py`. Eleven legacy root modules (`scribe_*.py`, `cochem_scribe_*.py`) remain unshipped in the repository root pending the staged Gemini Web publication redesign.
+The shipped, installable package lives exclusively under `src/cochem_scribe/` (`pyproject.toml` `where = ["src"]`, `include = ["cochem_scribe*"]`) with console entrypoint `cochem-scribe = "cochem_scribe.cli:main"` exposing 6 subcommands (`render-geom`, `render-kinetic`, `render-convergence`, `verify-register`, `audit-farir`, `provider-info`). Primary active modules are `src/cochem_scribe/renderers.py`, `src/cochem_scribe/register.py`, `src/cochem_scribe/provider.py`, and `src/cochem_scribe/cli.py`. Eleven legacy root modules (`scribe_*.py`, `cochem_scribe_*.py`) remain unshipped in the repository root pending the staged Gemini Web publication redesign.
 
 ## 2. Pipeline 5.0.0 Architecture Alignment & Resolved Conflicts
 
@@ -26,7 +26,7 @@ The shipped, installable package lives exclusively under `src/cochem_scribe/` (`
 
 `CoChem-SCRIBE` performs zero quantum-chemical calculation; it is strictly a deterministic downstream verification and visualization consumer:
 - **Verified Matplotlib Renderers (`src/cochem_scribe/renderers.py`):** Renders `CoChem-GEOM` rotational/structural comparison plots (`render-geom`) and `CoChem-KINETIC` 5-point CHEM 312 reaction profiles (`render-kinetic`) directly from verified JSON/CSV computational receipts with zero fabricated or interpolated synthetic series.
-- **Cryptographic Figure Source Register (`src/cochem_scribe/register.py`):** Maintains and audits the 19-entry SHA-256 source-file provenance register (`verify-register`) and enforces the far-IR exclusion gate (`audit-farir`) so unverified or excluded spectral regions cannot enter publication figures.
+- **Cryptographic Figure Source Register (`src/cochem_scribe/register.py`):** Maintains and audits the 19-entry SHA-256 source-file provenance register (`verify-register`) and enforces the out-of-scope encyclopedia exclusion gate (`audit-farir`) so unverified or excluded spectral regions cannot enter publication figures.
 - **Formatting & NLP Helpers (`src/cochem_scribe/formatting/latex_math.py`, `src/cochem_scribe/nlp/table_generation.py`, `src/cochem_scribe/nlp/citation_manager.py`):** Shipped deterministic formatting utilities awaiting integration into the staged publication catalog.
 
 ## 4. Cross-Repo Interfaces, Contracts & Canonical Schemas

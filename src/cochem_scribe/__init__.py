@@ -9,7 +9,12 @@ from .register import (
     build_in_scope_register_manifest,
     verify_source_register,
 )
-from .renderers import render_geom_comparison, render_kinetic_rxn_profile, sha256_file
+from .renderers import (
+    render_basis_convergence,
+    render_geom_comparison,
+    render_kinetic_rxn_profile,
+    sha256_file,
+)
 
 __version__ = VERSION
 
@@ -18,6 +23,7 @@ __all__ = [
     "__version__",
     "audit_farir_exclusion",
     "build_in_scope_register_manifest",
+    "render_basis_convergence",
     "render_geom_comparison",
     "render_kinetic_rxn_profile",
     "scribe_provider",

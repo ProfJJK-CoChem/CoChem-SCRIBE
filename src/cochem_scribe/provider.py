@@ -13,7 +13,12 @@ from pathlib import Path
 from typing import Any
 
 from .register import audit_farir_exclusion, verify_source_register
-from .renderers import render_geom_comparison, render_kinetic_rxn_profile, sha256_file
+from .renderers import (
+    render_basis_convergence,
+    render_geom_comparison,
+    render_kinetic_rxn_profile,
+    sha256_file,
+)
 
 INTEGRATION_CONTRACT = "cochem.module-handoff/1"
 SCIENTIFIC_API_VERSION = "cochem.module-provider/1"
@@ -22,6 +27,7 @@ VERSION = "0.2.0"
 OPERATIONS: tuple[str, ...] = (
     "render_geom_comparison",
     "render_kinetic_rxn_profile",
+    "render_basis_convergence",
     "verify_source_register",
     "audit_farir_exclusion",
 )
@@ -45,8 +51,8 @@ def metadata() -> dict[str, Any]:
                 "supported_engines": ["matplotlib"],
                 "scope": (
                     "Render verified CoChem-GEOM structural comparisons "
-                    "(r_e ORCA/PySCF, r_s Kraitchman, r_0 weighted fit, explicit r_e^SE PENDING) "
-                    "with SHA-256 provenance."
+                    "(r_e CCSD or non-CCSD DFT/revDSD, r_s Kraitchman, r_0 weighted fit, "
+                    "explicit PENDING annotations) with SHA-256 provenance."
                 ),
             },
             "render_kinetic_rxn_profile": {
@@ -54,8 +60,18 @@ def metadata() -> dict[str, Any]:
                 "required_engines": [],
                 "supported_engines": ["matplotlib"],
                 "scope": (
-                    "Render verified 5-stationary-point reaction-coordinate free-energy profiles "
-                    "(R, TS1, Int_tet, TS2, P) strictly rejecting or marking PENDING unverified rows."
+                    "Render verified 3-point (R, TS, P) or 5-point (R, TS1, Int_tet, TS2, P) "
+                    "reaction-coordinate free-energy profiles strictly rejecting or marking "
+                    "PENDING unverified rows."
+                ),
+            },
+            "render_basis_convergence": {
+                "available": True,
+                "required_engines": [],
+                "supported_engines": ["matplotlib"],
+                "scope": (
+                    "Render publication-grade 300-DPI PNG + vector PDF + SHA-256 manifest "
+                    "basis-set and method energy convergence figures from verified JSON or CSV."
                 ),
             },
             "verify_source_register": {
@@ -81,7 +97,7 @@ def metadata() -> dict[str, Any]:
 
 
 def dispatch_operation(operation: str, payload: dict[str, Any]) -> dict[str, Any]:
-    """Execute one of the four declared canonical CoChem-SCRIBE operations."""
+    """Execute one of the declared canonical CoChem-SCRIBE operations."""
     if operation not in OPERATIONS:
         raise ValueError(
             f"Unsupported CoChem-SCRIBE operation {operation!r}; valid: {OPERATIONS}"
@@ -104,6 +120,18 @@ def dispatch_operation(operation: str, payload: dict[str, Any]) -> dict[str, Any
             strict=bool(payload.get("strict", True)),
             title=payload.get("title"),
             manifest_path=payload.get("manifest_path"),
+            pathway_mode=str(payload.get("pathway_mode", "auto")),
+        )
+
+    if operation == "render_basis_convergence":
+        return render_basis_convergence(
+            input_path=payload["input_path"],
+            output_dir=payload["output_dir"],
+            prefix=str(payload.get("prefix", "convergence")),
+            title=payload.get("title"),
+            manifest_path=payload.get("manifest_path"),
+            units=str(payload.get("units", "kcal/mol")),
+            strict=bool(payload.get("strict", False)),
         )
 
     if operation == "verify_source_register":
@@ -144,6 +172,9 @@ def execute_handoff(
         options.setdefault("out_png", str(out_dir / "kinetic_rxn_profile.png"))
         options.setdefault("out_pdf", str(out_dir / "kinetic_rxn_profile.pdf"))
         options.setdefault("manifest_path", str(out_dir / "manifest_sha256.json"))
+    elif operation == "render_basis_convergence":
+        options.setdefault("output_dir", str(out_dir))
+        options.setdefault("prefix", "basis_convergence")
 
     result = dispatch_operation(operation, options)
     provider_file = Path(__file__).resolve()

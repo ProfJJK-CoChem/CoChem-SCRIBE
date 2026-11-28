@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import csv
 import json
-from importlib import metadata
+from importlib import metadata, resources
 from pathlib import Path
 
 import pytest
 
+from cochem_scribe.cli import main as scribe_cli_main
 from cochem_scribe.provider import scribe_provider
 from cochem_scribe.register import (
     FarIRExclusionError,
@@ -17,6 +18,7 @@ from cochem_scribe.register import (
     verify_source_register,
 )
 from cochem_scribe.renderers import (
+    render_basis_convergence,
     render_geom_comparison,
     render_kinetic_rxn_profile,
     sha256_file,
@@ -293,6 +295,7 @@ def test_cochem_modules_entry_point_and_scribe_provider_dispatch(tmp_path: Path)
     assert set(meta["operations"]) == {
         "render_geom_comparison",
         "render_kinetic_rxn_profile",
+        "render_basis_convergence",
         "verify_source_register",
         "audit_farir_exclusion",
     }
@@ -380,4 +383,383 @@ def test_live_render_chem312_verified_kinetic_profiles(tmp_path: Path) -> None:
         assert manifest["files_sha256"][checked_png.name] == sha256_file(checked_png)
         assert manifest["files_sha256"][checked_pdf.name] == sha256_file(checked_pdf)
         assert manifest["verified_figures"][stem]["source_csv_sha256"] == sha256_file(csv_path)
+
+
+def _valid_three_point_rows(bond_col: str = "forming_breaking_co") -> list[dict[str, object]]:
+    return [
+        {
+            "state": "R",
+            "status": "CONVERGED",
+            "n_imag": 0,
+            "imag_freq_cm1": "0.00",
+            bond_col: "",
+            "e_dft_ha": "-132.7051234500",
+            "zpe_ha": "0.0451200000",
+            "delta_e_kcal": "0.0000",
+            "delta_h_kcal": "0.0000",
+            "delta_g_rrho_kcal": "0.0000",
+            "delta_g_qrrho_kcal": "0.0000",
+        },
+        {
+            "state": "TS",
+            "status": "CONVERGED",
+            "n_imag": 1,
+            "imag_freq_cm1": "-896.91",
+            bond_col: "C0-N4=1.954A",
+            "e_dft_ha": "-132.6352000000",
+            "zpe_ha": "0.0439000000",
+            "delta_e_kcal": "43.8777",
+            "delta_h_kcal": "43.0457",
+            "delta_g_rrho_kcal": "42.7100",
+            "delta_g_qrrho_kcal": "42.6849",
+        },
+        {
+            "state": "P",
+            "status": "CONVERGED",
+            "n_imag": 0,
+            "imag_freq_cm1": "0.00",
+            bond_col: "",
+            "e_dft_ha": "-132.7412000000",
+            "zpe_ha": "0.0454000000",
+            "delta_e_kcal": "-22.6384",
+            "delta_h_kcal": "-22.4900",
+            "delta_g_rrho_kcal": "-22.6000",
+            "delta_g_qrrho_kcal": "-22.5884",
+        },
+    ]
+
+
+def test_kinetic_rxn_profile_renders_3pt_and_generic_bond_columns(tmp_path: Path) -> None:
+    """FINDING-410-04: support 3-point (R, TS, P) CSVs with forming_breaking_co or generic bond columns."""
+    for bond_col in ("forming_breaking_co", "reaction_coordinate_bond", "key_active_bond"):
+        rows = _valid_three_point_rows(bond_col=bond_col)
+        csv_path = tmp_path / f"stationary_3pt_{bond_col}.csv"
+        with csv_path.open("w", encoding="utf-8", newline="") as fh:
+            writer = csv.DictWriter(fh, fieldnames=list(rows[0].keys()))
+            writer.writeheader()
+            writer.writerows(rows)
+
+        out_png = tmp_path / f"rxn_3pt_{bond_col}.png"
+        out_pdf = tmp_path / f"rxn_3pt_{bond_col}.pdf"
+        out_manifest = tmp_path / f"rxn_3pt_{bond_col}.json"
+        receipt = render_kinetic_rxn_profile(
+            csv_path,
+            out_png,
+            out_pdf,
+            strict=True,
+            manifest_path=out_manifest,
+        )
+        assert out_png.is_file() and out_png.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+        assert out_pdf.is_file() and out_pdf.read_bytes()[:5] == b"%PDF-"
+        assert receipt["pathway_mode"] == "elementary_3pt"
+        assert receipt["n_stationary_points"] == 3
+        assert receipt["bond_column"] == bond_col
+        assert receipt["verified_states"] == ["R", "TS", "P"]
+        assert receipt["pending_states"] == []
+        ts_pt = next(p for p in receipt["stationary_points"] if p["state"] == "TS")
+        assert ts_pt["active_bond"] == "C0-N4=1.954A"
+        assert audit_farir_exclusion(out_manifest)["passed"] is True
+
+    # Also verify CLI round-trip on 3-point CSV without any bond column
+    rows_no_bond = [{k: v for k, v in r.items() if k != "forming_breaking_co"} for r in _valid_three_point_rows()]
+    csv_no_bond = tmp_path / "stationary_3pt_nobond.csv"
+    with csv_no_bond.open("w", encoding="utf-8", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=list(rows_no_bond[0].keys()))
+        writer.writeheader()
+        writer.writerows(rows_no_bond)
+
+    rc = scribe_cli_main(
+        [
+            "render-kinetic",
+            "--input",
+            str(csv_no_bond),
+            "--out-png",
+            str(tmp_path / "cli_3pt.png"),
+            "--out-pdf",
+            str(tmp_path / "cli_3pt.pdf"),
+            "--manifest",
+            str(tmp_path / "cli_3pt.json"),
+        ]
+    )
+    assert rc == 0
+    assert (tmp_path / "cli_3pt.png").is_file()
+    assert (tmp_path / "cli_3pt.pdf").is_file()
+
+    # Fail closed on bad n_imag for 3-point TS and on mixed TS + TS1 ambiguity
+    bad_ts = _valid_three_point_rows()
+    bad_ts[1]["n_imag"] = 0
+    csv_bad = tmp_path / "bad_3pt_ts.csv"
+    with csv_bad.open("w", encoding="utf-8", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=list(bad_ts[0].keys()))
+        writer.writeheader()
+        writer.writerows(bad_ts)
+    with pytest.raises(ValueError, match="n_imag=0"):
+        render_kinetic_rxn_profile(csv_bad, tmp_path / "bad.png", tmp_path / "bad.pdf", strict=True)
+
+    mixed_rows = _valid_three_point_rows() + [
+        {** _valid_three_point_rows()[1], "state": "TS1"}
+    ]
+    csv_mixed = tmp_path / "mixed.csv"
+    with csv_mixed.open("w", encoding="utf-8", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=list(mixed_rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(mixed_rows)
+    with pytest.raises(ValueError, match="Ambiguous"):
+        render_kinetic_rxn_profile(csv_mixed, tmp_path / "mix.png", tmp_path / "mix.pdf", strict=True)
+
+
+def test_render_geom_non_ccsd_pending_omitted_and_fail_closed(tmp_path: Path) -> None:
+    """FINDING-411-04 & FINDING-490-04: render verified non-CCSD columns, annotate CCSD: PENDING, fail closed on 0 verified."""
+    # Case 1: CCSD columns explicitly PENDING/NaN (e.g., `cochem-geom benchmark-h2o` without --run-qm)
+    pending_ccsd_payload = {
+        "schema_version": "cochem.geom.structural-comparison/1",
+        "molecule": "H2O",
+        "symmetry": "C2v",
+        "columns": {
+            "r_e_ccsd_cc_pvtz_orca": {"status": "PENDING"},
+            "r_e_ccsd_cc_pvdz_pyscf": {"status": "PENDING", "bond_angstrom": "NaN", "angle_deg": "NaN"},
+            "r_s_kraitchman": {
+                "status": "VERIFIED",
+                "bond_angstrom": 0.965592,
+                "bond_costain_uncertainty_angstrom": 0.014363,
+                "angle_deg": 103.4504,
+                "angle_costain_uncertainty_deg": 2.1525,
+            },
+            "r_0_weighted_fit": {
+                "status": "VERIFIED",
+                "bond_label": "r(O-H)",
+                "angle_label": "angle(H-O-H)",
+                "bond_angstrom": 0.957470,
+                "bond_std_err_scaled_angstrom": 0.001191,
+                "angle_deg": 104.9839,
+                "angle_std_err_scaled_deg": 0.1643,
+            },
+            "r_e_se": {"status": "PENDING", "bond_angstrom": None, "angle_deg": None},
+        },
+        "experimental_provenance": {"source_doi": "10.1021/jp511432m"},
+    }
+    p1_json = tmp_path / "h2o_non_ccsd_pending.json"
+    p1_json.write_text(json.dumps(pending_ccsd_payload, indent=2), encoding="utf-8")
+    p1_png = tmp_path / "h2o_non_ccsd.png"
+    p1_pdf = tmp_path / "h2o_non_ccsd.pdf"
+    p1_man = tmp_path / "h2o_non_ccsd_manifest.json"
+    r1 = render_geom_comparison(p1_json, p1_png, p1_pdf, manifest_path=p1_man)
+    assert p1_png.is_file() and p1_png.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+    assert p1_pdf.is_file() and p1_pdf.read_bytes()[:5] == b"%PDF-"
+    assert r1["ccsd_status"] == "PENDING"
+    assert r1["verified_columns"] == ["r_s_kraitchman", "r_0_weighted_fit"]
+    assert "r_e_ccsd_cc_pvtz_orca" in r1["pending_columns"]
+    assert audit_farir_exclusion(p1_man)["passed"] is True
+
+    # Case 2: CCSD columns omitted completely, local revDSD CHEM 490 column verified
+    revdsd_payload = {
+        "schema_version": "cochem.geom.structural-comparison/1",
+        "molecule": "H2O",
+        "symmetry": "C2v",
+        "columns": {
+            "r_e_revdsd_def2_tzvpp_orca": {
+                "status": "VERIFIED",
+                "backend": "orca_revdsd",
+                "method": "revDSD-PBEP86-D4",
+                "basis": "def2-TZVPP",
+                "bond_angstrom": 0.959387,
+                "angle_deg": 104.244,
+            },
+            "r_0_weighted_fit": {
+                "status": "VERIFIED",
+                "bond_label": "r(O-H)",
+                "angle_label": "angle(H-O-H)",
+                "bond_angstrom": 0.957470,
+                "bond_std_err_scaled_angstrom": 0.001191,
+                "angle_deg": 104.9839,
+                "angle_std_err_scaled_deg": 0.1643,
+            },
+        },
+    }
+    p2_json = tmp_path / "h2o_revdsd_only.json"
+    p2_json.write_text(json.dumps(revdsd_payload, indent=2), encoding="utf-8")
+    r2 = render_geom_comparison(p2_json, tmp_path / "revdsd.png", tmp_path / "revdsd.pdf")
+    assert r2["ccsd_status"] == "PENDING"
+    assert r2["verified_columns"] == ["r_e_revdsd_def2_tzvpp_orca", "r_0_weighted_fit"]
+    assert (tmp_path / "revdsd.png").is_file()
+
+    # Case 3: Fail closed when ZERO verified data columns exist
+    all_pending_payload = {
+        "schema_version": "cochem.geom.structural-comparison/1",
+        "molecule": "H2O",
+        "columns": {
+            "r_e_ccsd_cc_pvtz_orca": {"status": "PENDING"},
+            "r_e_ccsd_cc_pvdz_pyscf": {"status": "PENDING"},
+            "r_e_se": {"status": "PENDING"},
+        },
+    }
+    p3_json = tmp_path / "h2o_all_pending.json"
+    p3_json.write_text(json.dumps(all_pending_payload, indent=2), encoding="utf-8")
+    with pytest.raises(ValueError, match="No verified structural columns"):
+        render_geom_comparison(p3_json, tmp_path / "empty.png", tmp_path / "empty.pdf")
+    assert not (tmp_path / "empty.png").exists()
+
+
+def test_render_basis_convergence_json_csv_cli_and_farir(tmp_path: Path) -> None:
+    """FINDING-411-04 & FINDING-490-04: render-convergence PNG+PDF+SHA-256 manifest, FARIR-clean, fail-closed."""
+    # 1. CHEM 411 M2 authentic H2CO basis-set convergence JSON via CLI
+    m2_payload = {
+        "molecule": "H2CO (Formaldehyde)",
+        "pyscf_convergence": [
+            {
+                "basis": "def2-SVP",
+                "nao": 38,
+                "rhf_converged": True,
+                "rhf_energy_eh": -113.77890351964737,
+                "b3lyp_converged": True,
+                "b3lyp_energy_eh": -114.41527315255871,
+                "mp2_total_energy_eh": -114.09457304964101,
+            },
+            {
+                "basis": "cc-pVDZ",
+                "nao": 38,
+                "rhf_converged": True,
+                "rhf_energy_eh": -113.87661760667604,
+                "b3lyp_converged": True,
+                "b3lyp_energy_eh": -114.50739223124799,
+                "mp2_total_energy_eh": -114.19263618752215,
+            },
+            {
+                "basis": "def2-TZVP",
+                "nao": 74,
+                "rhf_converged": True,
+                "rhf_energy_eh": -113.91675505558379,
+                "b3lyp_converged": True,
+                "b3lyp_energy_eh": -114.5542564739603,
+                "mp2_total_energy_eh": -114.30471615662576,
+            },
+            {
+                "basis": "cc-pVTZ",
+                "nao": 88,
+                "rhf_converged": True,
+                "rhf_energy_eh": -113.91205807638676,
+                "b3lyp_converged": True,
+                "b3lyp_energy_eh": -114.54940498725674,
+                "mp2_total_energy_eh": -114.30696488116314,
+            },
+        ],
+        "orca_convergence": [
+            {
+                "basis": "def2-SVP",
+                "terminated_normally": True,
+                "rhf_energy_eh": -113.778903518805,
+                "b3lyp_energy_eh": -114.356101732971,
+                "mp2_total_energy_eh": -114.094572985161,
+            },
+            {
+                "basis": "def2-TZVP",
+                "terminated_normally": True,
+                "rhf_energy_eh": -113.916755054387,
+                "b3lyp_energy_eh": -114.49509381295,
+                "mp2_total_energy_eh": -114.304715304005,
+            },
+            {
+                "basis": "cc-pVTZ",
+                "terminated_normally": True,
+                "rhf_energy_eh": -113.912058075813,
+                "b3lyp_energy_eh": -114.490238594513,
+                "mp2_total_energy_eh": -114.30696489301,
+            },
+        ],
+        "helgaker_cbs_mp2_corr_dz_tz_eh": -0.4281228990628114,
+    }
+    json_in = tmp_path / "chem411_m2_basis_convergence.json"
+    json_in.write_text(json.dumps(m2_payload, indent=2), encoding="utf-8")
+    out_dir = tmp_path / "conv_out"
+
+    rc = scribe_cli_main(
+        [
+            "render-convergence",
+            "--input",
+            str(json_in),
+            "--output-dir",
+            str(out_dir),
+            "--prefix",
+            "h2co_m2_convergence",
+        ]
+    )
+    assert rc == 0
+    png_file = out_dir / "h2co_m2_convergence.png"
+    pdf_file = out_dir / "h2co_m2_convergence.pdf"
+    man_file = out_dir / "h2co_m2_convergence_manifest_sha256.json"
+    assert png_file.is_file() and png_file.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+    assert pdf_file.is_file() and pdf_file.read_bytes()[:5] == b"%PDF-"
+    assert man_file.is_file()
+
+    manifest = json.loads(man_file.read_text(encoding="utf-8"))
+    assert manifest["mode"] == "basis_set_convergence"
+    assert manifest["verified_point_count"] == 21
+    assert manifest["pending_point_count"] == 0
+    assert manifest["outputs"]["png"]["sha256"] == sha256_file(png_file)
+    assert manifest["outputs"]["pdf"]["sha256"] == sha256_file(pdf_file)
+    farir_report = audit_farir_exclusion(out_dir, raise_on_violation=False)
+    assert farir_report["passed"] is True
+    assert farir_report["violation_count"] == 0
+
+    # 2. CHEM 490 CSV method comparison with explicit PENDING CCSD entry
+    csv_in = tmp_path / "chem490_methods.csv"
+    csv_rows = [
+        {"molecule": "H2CO", "engine": "ORCA", "method": "B3LYP-D4", "basis": "def2-TZVPP", "energy_eh": "-114.495084", "status": "VERIFIED"},
+        {"molecule": "H2CO", "engine": "ORCA", "method": "revDSD-PBEP86-D4", "basis": "def2-TZVPP", "energy_eh": "-114.357977", "status": "VERIFIED"},
+        {"molecule": "H2CO", "engine": "ORCA", "method": "CCSD(T)", "basis": "cc-pVTZ", "energy_eh": "PENDING", "status": "PENDING"},
+    ]
+    with csv_in.open("w", encoding="utf-8", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=list(csv_rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(csv_rows)
+
+    csv_out = tmp_path / "conv_csv_out"
+    receipt_csv = render_basis_convergence(csv_in, csv_out, prefix="chem490_h2co")
+    assert receipt_csv["mode"] == "method_comparison"
+    assert receipt_csv["verified_point_count"] == 2
+    assert receipt_csv["pending_point_count"] == 1
+    assert (csv_out / "chem490_h2co.png").is_file()
+    assert (csv_out / "chem490_h2co.pdf").is_file()
+    assert audit_farir_exclusion(csv_out)["passed"] is True
+
+    # Strict mode rejects PENDING entry
+    with pytest.raises(ValueError, match="PENDING"):
+        render_basis_convergence(csv_in, tmp_path / "strict_fail", strict=True)
+
+    # All-PENDING input fails closed even when strict=False
+    empty_json = tmp_path / "all_pending_conv.json"
+    empty_json.write_text(
+        json.dumps({"records": [{"basis": "cc-pVTZ", "method": "CCSD", "energy_eh": "NaN", "status": "PENDING"}]}),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="No verified finite energy convergence points"):
+        render_basis_convergence(empty_json, tmp_path / "zero_out")
+
+    # Provider dispatch check
+    prov_res = scribe_provider.dispatch_operation(
+        "render_basis_convergence",
+        {
+            "input_path": str(json_in),
+            "output_dir": str(tmp_path / "prov_conv"),
+            "prefix": "prov_h2co",
+        },
+    )
+    assert prov_res["verified_point_count"] == 21
+    assert Path(prov_res["outputs"]["png"]["path"]).is_file()
+
+
+def test_packaged_figure_register_resource_and_default_cli() -> None:
+    """FINDING-411-05 / 490-06 / 312-09: packaged manifest matches repo manifest and default CLI exits 0."""
+    pkg_res = resources.files("cochem_scribe").joinpath("manifests", "in_scope_figure_register.json")
+    assert pkg_res.is_file(), "Packaged in_scope_figure_register.json missing from cochem_scribe package data"
+
+    repo_manifest = REPO_ROOT / "manifests" / "in_scope_figure_register.json"
+    assert repo_manifest.is_file()
+    with resources.as_file(pkg_res) as pkg_path:
+        assert sha256_file(pkg_path) == sha256_file(repo_manifest)
+
+    report = verify_source_register()
+    assert report["passed"] is True
+    assert report["total_figures"] == 19
+    assert scribe_cli_main(["verify-register"]) == 0
 
