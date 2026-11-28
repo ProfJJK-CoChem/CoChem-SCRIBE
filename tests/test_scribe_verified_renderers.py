@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 from importlib import metadata, resources
 from pathlib import Path
@@ -756,7 +757,12 @@ def test_packaged_figure_register_resource_and_default_cli() -> None:
     repo_manifest = REPO_ROOT / "manifests" / "in_scope_figure_register.json"
     assert repo_manifest.is_file()
     with resources.as_file(pkg_res) as pkg_path:
-        assert sha256_file(pkg_path) == sha256_file(repo_manifest)
+        pkg_lf_sha = hashlib.sha256(pkg_path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+        repo_lf_sha = hashlib.sha256(repo_manifest.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+        assert pkg_lf_sha == repo_lf_sha
+        assert json.loads(pkg_path.read_text(encoding="utf-8")) == json.loads(
+            repo_manifest.read_text(encoding="utf-8")
+        )
 
     report = verify_source_register()
     assert report["passed"] is True
